@@ -21,61 +21,63 @@ export const Route = createFileRoute("/seller/compliance/epr/by-type")({
 const CATEGORIES: EprCategory[] = ["packaging", "batteries", "weee", "textiles"];
 
 const PRODUCT_TRIGGERS: Record<EprCategory, string> = {
-  packaging: "Triggered by every shipped item — mechanical watches, quartz watches, smartwatches, bags, apparel, shoes, jewelry, art.",
+  packaging: "Triggered by every shipped item.",
   batteries: "Triggered by quartz watches and smartwatches.",
-  weee: "Triggered by smartwatches and certain quartz watches with electronic modules.",
+  weee: "Triggered by smartwatches and quartz watches with electronic modules.",
   textiles: "Triggered by apparel, shoes, and textile-based bags.",
 };
 
 function Page() {
   return (
     <SellerLayout>
-      <nav className="text-xs uppercase tracking-[0.14em] text-muted-foreground mb-6">
-        <Link to="/seller/compliance" className="hover:text-ink">Compliance</Link>
-        <span className="mx-2">/</span>
-        <Link to="/seller/compliance/epr" className="hover:text-ink">EPR</Link>
-        <span className="mx-2">/</span>
-        <span className="text-ink">By type</span>
-      </nav>
+      <div className="max-w-[1040px] mx-auto">
+        <nav className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-6">
+          <Link to="/seller/compliance" className="hover:text-ink">Compliance</Link>
+          <span className="mx-2">/</span>
+          <Link to="/seller/compliance/epr" className="hover:text-ink">EPR</Link>
+          <span className="mx-2">/</span>
+          <span className="text-ink">By type</span>
+        </nav>
 
-      <header className="mb-10">
-        <h1 className="text-3xl text-ink">Obligations by type</h1>
-        <p className="mt-3 text-sm text-muted-foreground max-w-2xl">
-          Each category is governed by a different regulator in each country.
-          Open a category to see how it applies across the markets you sell to.
-        </p>
-      </header>
+        <header className="mb-10">
+          <h1 className="text-[2rem] text-ink">Obligations by type</h1>
+          <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground max-w-2xl">
+            Each category is governed by a different regulator in each country.
+          </p>
+        </header>
 
-      <div className="space-y-10">
-        {CATEGORIES.map((cat) => {
-          const rows = OBLIGATIONS.filter((o) => o.category === cat);
-          return (
-            <section key={cat}>
-              <div className="border-b border-line pb-3 mb-0 flex items-baseline justify-between">
-                <h2 className="text-lg text-ink">{CATEGORY_LABEL[cat]}</h2>
-                <p className="text-xs text-muted-foreground max-w-md text-right">
-                  {PRODUCT_TRIGGERS[cat]}
-                </p>
-              </div>
-              <div className="border border-t-0 border-line divide-y divide-line">
-                {rows.map((r) => (
-                  <Link
-                    key={r.id}
-                    to="/seller/compliance/epr/packaging-germany"
-                    className="grid grid-cols-[180px_1fr_140px_160px] items-center px-5 py-4 hover:bg-muted/40"
-                  >
-                    <span className="text-sm text-ink">{COUNTRY_LABEL[r.country]}</span>
-                    <span className="text-xs text-muted-foreground pr-6">{r.note}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {r.affectedProducts > 0 ? `${r.affectedProducts} listings` : "—"}
-                    </span>
-                    <span className="flex justify-end"><StatusBadge status={r.status} /></span>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          );
-        })}
+        <div className="space-y-5">
+          {CATEGORIES.map((cat) => {
+            const rows = OBLIGATIONS.filter((o) => o.category === cat);
+            return (
+              <section key={cat} className="border border-line bg-background p-7">
+                <div className="flex items-baseline justify-between mb-5">
+                  <h2 className="text-lg text-ink">{CATEGORY_LABEL[cat]}</h2>
+                  <p className="text-xs text-muted-foreground max-w-md text-right">
+                    {PRODUCT_TRIGGERS[cat]}
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  {rows.map((r) => (
+                    <Link
+                      key={r.id}
+                      to="/seller/compliance/epr/packaging-germany"
+                      className="flex items-center justify-between py-2.5 border-b border-line last:border-0 hover:text-ink"
+                    >
+                      <span className="text-sm text-ink">{COUNTRY_LABEL[r.country]}</span>
+                      <div className="flex items-center gap-4">
+                        <span className="text-xs text-muted-foreground">
+                          {r.affectedProducts > 0 ? `${r.affectedProducts} listings` : "—"}
+                        </span>
+                        <StatusBadge status={r.status} />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
       </div>
     </SellerLayout>
   );
