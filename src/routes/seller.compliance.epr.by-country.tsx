@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SellerLayout } from "@/components/seller/SellerLayout";
-import { StatusBadge } from "@/components/seller/StatusBadge";
 import {
   OBLIGATIONS,
   CATEGORY_LABEL,
   COUNTRY_LABEL,
+  statusGroup,
   type CountryCode,
 } from "@/lib/epr-data";
+import { ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/seller/compliance/epr/by-country")({
   head: () => ({
@@ -27,52 +28,88 @@ const COUNTRIES: { code: CountryCode; flag: string; sales: string }[] = [
 function Page() {
   return (
     <SellerLayout>
-      <nav className="text-xs uppercase tracking-[0.14em] text-muted-foreground mb-6">
-        <Link to="/seller/compliance" className="hover:text-ink">Compliance</Link>
-        <span className="mx-2">/</span>
-        <Link to="/seller/compliance/epr" className="hover:text-ink">EPR</Link>
-        <span className="mx-2">/</span>
-        <span className="text-ink">By destination country</span>
-      </nav>
+      <div className="max-w-[1040px] mx-auto">
+        <nav className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-6">
+          <Link to="/seller/compliance" className="hover:text-ink">Compliance</Link>
+          <span className="mx-2">/</span>
+          <Link to="/seller/compliance/epr" className="hover:text-ink">EPR</Link>
+          <span className="mx-2">/</span>
+          <span className="text-ink">By destination country</span>
+        </nav>
 
-      <header className="mb-10">
-        <h1 className="text-3xl text-ink">Obligations by destination country</h1>
-        <p className="mt-3 text-sm text-muted-foreground max-w-2xl">
-          You currently sell to three markets. Each country defines its own
-          producer-responsibility scheme — a missing obligation only blocks
-          shipments to that country, not your entire catalogue.
-        </p>
-      </header>
+        <header className="mb-10">
+          <h1 className="text-[2rem] text-ink">Obligations by destination country</h1>
+          <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground max-w-2xl">
+            A missing obligation only blocks shipments to that country, not your
+            entire catalogue.
+          </p>
+        </header>
 
-      <div className="space-y-12">
-        {COUNTRIES.map((country) => {
-          const rows = OBLIGATIONS.filter((o) => o.country === country.code);
-          return (
-            <section key={country.code}>
-              <div className="flex items-baseline justify-between border-b border-line pb-3">
-                <h2 className="text-lg text-ink">
-                  <span className="mr-2">{country.flag}</span>
-                  {COUNTRY_LABEL[country.code]}
-                </h2>
-                <p className="text-xs text-muted-foreground">{country.sales}</p>
-              </div>
-              <div className="border border-t-0 border-line divide-y divide-line">
-                {rows.map((r) => (
+        <div className="space-y-5">
+          {COUNTRIES.map((country) => {
+            const rows = OBLIGATIONS.filter((o) => o.country === country.code);
+            const needs = rows.filter((r) => statusGroup(r.status) === "needs-action");
+            const affected = needs.reduce((a, r) => a + r.affectedProducts, 0);
+            const overall =
+              needs.length > 0 ? "Partially blocked" :
+              rows.some((r) => statusGroup(r.status) === "expiring-soon") ? "Renewal due" :
+              rows.some((r) => statusGroup(r.status) === "under-review") ? "Under review" :
+              "Approved";
+            const toneClass =
+              needs.length > 0 ? "text-rose-700" :
+              overall === "Renewal due" ? "text-amber-800" :
+              overall === "Under review" ? "text-slate-600" :
+              "text-emerald-700";
+
+            return (
+              <section key={country.code} className="border border-line bg-background p-7">
+                <div className="flex items-start justify-between gap-8">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg text-ink">
+                      <span className="mr-2">{country.flag}</span>
+                      {COUNTRY_LABEL[country.code]}
+                    </h2>
+                    <p className={`text-xs mt-1 ${toneClass}`}>Status: {overall}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{country.sales}</p>
+
+                    {needs.length > 0 ? (
+                      <div className="mt-6">
+                        <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
+                          Needs attention
+                        </p>
+                        <ul className="text-sm text-ink space-y-1">
+                          {needs.map((n) => (
+                            <li key={n.id}>
+                              · {CATEGORY_LABEL[n.category]}
+                              <span className="text-muted-foreground"> — {n.note}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        {affected > 0 && (
+                          <p className="text-xs text-muted-foreground mt-3">
+                            Affected listings: {affected}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground mt-5">No action required.</p>
+                    )}
+                  </div>
+
                   <Link
-                    key={r.id}
                     to="/seller/compliance/epr/packaging-germany"
-                    className="grid grid-cols-[220px_1fr_160px_160px] items-center px-5 py-4 hover:bg-muted/40"
+                    className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink whitespace-nowrap"
                   >
-                    <span className="text-sm text-ink">{CATEGORY_LABEL[r.category]}</span>
-                    <span className="text-xs text-muted-foreground pr-6">{r.authority}</span>
-                    <span className="text-xs text-muted-foreground">{r.dueLabel ?? "—"}</span>
-                    <span className="flex justify-end"><StatusBadge status={r.status} /></span>
+                    {needs.length > 0
+                      ? `Resolve ${COUNTRY_LABEL[country.code]} requirements`
+                      : "View details"}
+                    <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} />
                   </Link>
-                ))}
-              </div>
-            </section>
-          );
-        })}
+                </div>
+              </section>
+            );
+          })}
+        </div>
       </div>
     </SellerLayout>
   );
