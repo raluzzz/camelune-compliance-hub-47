@@ -78,22 +78,55 @@ export const OBLIGATIONS: Obligation[] = [
   { id: "fr-tex", category: "textiles", country: "FR", status: "approved", dueLabel: "Renews 31 Dec 2026", affectedProducts: 22, authority: "Refashion", note: "TLC category — apparel, shoes, bags." },
 ];
 
-export function statusToneClass(s: EprStatus) {
+export type StatusGroup =
+  | "needs-action"
+  | "under-review"
+  | "approved"
+  | "expiring-soon"
+  | "neutral";
+
+export const STATUS_GROUP_LABEL: Record<StatusGroup, string> = {
+  "needs-action": "Needs action",
+  "under-review": "Under review",
+  approved: "Approved",
+  "expiring-soon": "Expiring soon",
+  neutral: "Not required",
+};
+
+export function statusGroup(s: EprStatus): StatusGroup {
   switch (s) {
-    case "approved":
-      return "bg-emerald-50 text-emerald-800 border-emerald-200";
     case "missing":
     case "rejected":
-      return "bg-red-50 text-red-800 border-red-200";
-    case "under-review":
-    case "submitted":
-      return "bg-blue-50 text-blue-800 border-blue-200";
-    case "draft":
-      return "bg-muted text-ink-soft border-line";
-    case "expiring-soon":
     case "review-required":
-      return "bg-amber-50 text-amber-900 border-amber-200";
+      return "needs-action";
+    case "submitted":
+    case "under-review":
+    case "draft":
+      return "under-review";
+    case "approved":
+      return "approved";
+    case "expiring-soon":
+      return "expiring-soon";
     case "not-required":
-      return "bg-muted text-muted-foreground border-line";
+      return "neutral";
   }
+}
+
+export function statusGroupToneClass(g: StatusGroup) {
+  switch (g) {
+    case "needs-action":
+      return "bg-rose-50/70 text-rose-700";
+    case "under-review":
+      return "bg-slate-100/70 text-slate-600";
+    case "approved":
+      return "bg-emerald-50/70 text-emerald-700";
+    case "expiring-soon":
+      return "bg-amber-50/80 text-amber-800";
+    case "neutral":
+      return "bg-muted text-muted-foreground";
+  }
+}
+
+export function statusToneClass(s: EprStatus) {
+  return statusGroupToneClass(statusGroup(s));
 }

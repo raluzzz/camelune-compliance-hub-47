@@ -1,13 +1,24 @@
-import { STATUS_LABEL, statusToneClass, type EprStatus } from "@/lib/epr-data";
+import {
+  STATUS_GROUP_LABEL,
+  statusGroup,
+  statusGroupToneClass,
+  type EprStatus,
+  type StatusGroup,
+} from "@/lib/epr-data";
 
-export function StatusBadge({ status }: { status: EprStatus }) {
+export function StatusBadge({
+  status,
+  group,
+}: {
+  status?: EprStatus;
+  group?: StatusGroup;
+}) {
+  const g = group ?? (status ? statusGroup(status) : "neutral");
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] border ${statusToneClass(
-        status,
-      )}`}
+      className={`inline-flex items-center px-2 py-[3px] rounded-full text-[10.5px] tracking-[0.04em] font-medium ${statusGroupToneClass(g)}`}
     >
-      {STATUS_LABEL[status]}
+      {STATUS_GROUP_LABEL[g]}
     </span>
   );
 }
