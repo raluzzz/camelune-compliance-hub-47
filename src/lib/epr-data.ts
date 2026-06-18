@@ -1,0 +1,99 @@
+export type EprStatus =
+  | "missing"
+  | "draft"
+  | "submitted"
+  | "under-review"
+  | "approved"
+  | "rejected"
+  | "expiring-soon"
+  | "not-required"
+  | "review-required";
+
+export const STATUS_LABEL: Record<EprStatus, string> = {
+  missing: "Missing",
+  draft: "Draft",
+  submitted: "Submitted",
+  "under-review": "Under review",
+  approved: "Approved",
+  rejected: "Rejected",
+  "expiring-soon": "Expiring soon",
+  "not-required": "Not required",
+  "review-required": "Review required",
+};
+
+export type EprCategory = "packaging" | "batteries" | "weee" | "textiles";
+
+export const CATEGORY_LABEL: Record<EprCategory, string> = {
+  packaging: "Packaging",
+  batteries: "Batteries",
+  weee: "Electrical products / WEEE",
+  textiles: "Textiles",
+};
+
+export type CountryCode = "RO" | "DE" | "FR";
+
+export const COUNTRY_LABEL: Record<CountryCode, string> = {
+  RO: "Romania",
+  DE: "Germany",
+  FR: "France",
+};
+
+export interface Obligation {
+  id: string;
+  category: EprCategory;
+  country: CountryCode;
+  status: EprStatus;
+  dueLabel?: string;
+  affectedProducts: number;
+  authority: string;
+  note?: string;
+}
+
+export const SELLER = {
+  name: "Veronica Fox",
+  email: "nykaqito@mailinator.com",
+  company: "Atelier Lune SRL",
+  baseCountry: "RO" as CountryCode,
+  sellsTo: ["RO", "DE", "FR"] as CountryCode[],
+  shippingModel: "Mixed — direct & Camelune-authenticated",
+};
+
+export const OBLIGATIONS: Obligation[] = [
+  // Romania
+  { id: "ro-pack", category: "packaging", country: "RO", status: "approved", dueLabel: "Renews 31 Mar 2027", affectedProducts: 48, authority: "ANPM / OIREP", note: "EPR number on file. Annual declaration filed." },
+  { id: "ro-batt", category: "batteries", country: "RO", status: "approved", dueLabel: "Renews 31 Mar 2027", affectedProducts: 12, authority: "ANPM", note: "Covers quartz & smart watches." },
+  { id: "ro-weee", category: "weee", country: "RO", status: "not-required", affectedProducts: 0, authority: "ANPM", note: "No WEEE-classified items currently listed for RO." },
+  { id: "ro-tex", category: "textiles", country: "RO", status: "draft", dueLabel: "Voluntary scheme", affectedProducts: 6, authority: "Reciclad'OR", note: "Draft saved 12 Jun 2026." },
+
+  // Germany
+  { id: "de-pack", category: "packaging", country: "DE", status: "missing", dueLabel: "Blocks DE sales", affectedProducts: 31, authority: "ZSVR / LUCID", note: "Required before any shipment enters Germany." },
+  { id: "de-batt", category: "batteries", country: "DE", status: "review-required", dueLabel: "Action required", affectedProducts: 9, authority: "Stiftung EAR (BattG-Melderegister)", note: "Quartz & smartwatch listings need battery registration." },
+  { id: "de-weee", category: "weee", country: "DE", status: "submitted", dueLabel: "Filed 02 Jun 2026", affectedProducts: 4, authority: "Stiftung EAR", note: "Awaiting WEEE number assignment." },
+  { id: "de-tex", category: "textiles", country: "DE", status: "expiring-soon", dueLabel: "Renew by 14 Aug 2026", affectedProducts: 18, authority: "ZSVR (voluntary register)", note: "Apparel & bag declarations expire in 8 weeks." },
+
+  // France
+  { id: "fr-pack", category: "packaging", country: "FR", status: "approved", dueLabel: "Renews 31 Dec 2026", affectedProducts: 48, authority: "ADEME — Citeo", note: "UIN: FR234560_01ABCD." },
+  { id: "fr-batt", category: "batteries", country: "FR", status: "under-review", dueLabel: "Submitted 28 May 2026", affectedProducts: 9, authority: "ADEME — Screlec", note: "PRO contract under verification." },
+  { id: "fr-weee", category: "weee", country: "FR", status: "rejected", dueLabel: "Resubmit required", affectedProducts: 4, authority: "ADEME — Ecosystem", note: "Authorized representative document was illegible." },
+  { id: "fr-tex", category: "textiles", country: "FR", status: "approved", dueLabel: "Renews 31 Dec 2026", affectedProducts: 22, authority: "Refashion", note: "TLC category — apparel, shoes, bags." },
+];
+
+export function statusToneClass(s: EprStatus) {
+  switch (s) {
+    case "approved":
+      return "bg-emerald-50 text-emerald-800 border-emerald-200";
+    case "missing":
+    case "rejected":
+      return "bg-red-50 text-red-800 border-red-200";
+    case "under-review":
+    case "submitted":
+      return "bg-blue-50 text-blue-800 border-blue-200";
+    case "draft":
+      return "bg-muted text-ink-soft border-line";
+    case "expiring-soon":
+    case "review-required":
+      return "bg-amber-50 text-amber-900 border-amber-200";
+    case "not-required":
+      return "bg-muted text-muted-foreground border-line";
+  }
+}
