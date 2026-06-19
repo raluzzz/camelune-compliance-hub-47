@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { SellerLayout } from "@/components/seller/SellerLayout";
+import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { Stepper } from "@/components/seller/Stepper";
 import { Upload, FileCheck2 } from "lucide-react";
 
@@ -35,7 +35,7 @@ function Page() {
   const navigate = useNavigate();
 
   return (
-    <SellerLayout>
+    <ModuleLayout>
       <nav className="text-xs uppercase tracking-[0.14em] text-muted-foreground mb-6">
         <Link to="/seller/compliance/epr/packaging-germany" className="hover:text-ink">
           Packaging · Germany
@@ -171,7 +171,7 @@ function Page() {
           </button>
         )}
       </div>
-    </SellerLayout>
+    </ModuleLayout>
   );
 }
 
