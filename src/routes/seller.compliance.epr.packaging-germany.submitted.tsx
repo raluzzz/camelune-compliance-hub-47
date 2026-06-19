@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { SellerLayout } from "@/components/seller/SellerLayout";
+import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { StatusBadge } from "@/components/seller/StatusBadge";
 import { CheckCircle2 } from "lucide-react";
 
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/seller/compliance/epr/packaging-germany/s
 
 function Page() {
   return (
-    <SellerLayout>
+    <ModuleLayout>
       <nav className="text-xs uppercase tracking-[0.14em] text-muted-foreground mb-6">
         <Link to="/seller/compliance/epr/packaging-germany" className="hover:text-ink">
           Packaging · Germany
@@ -63,6 +63,6 @@ function Page() {
           Compliance center
         </Link>
       </div>
-    </SellerLayout>
+    </ModuleLayout>
   );
 }

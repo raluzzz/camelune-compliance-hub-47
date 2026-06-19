@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { SellerLayout } from "@/components/seller/SellerLayout";
+import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { StatusBadge } from "@/components/seller/StatusBadge";
 import {
   Accordion,
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/seller/compliance/epr/packaging-germany/"
 
 function Page() {
   return (
-    <SellerLayout>
+    <ModuleLayout>
       <div className="max-w-[900px] mx-auto">
         <nav className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-6">
           <Link to="/seller/compliance" className="hover:text-ink">Compliance</Link>
@@ -169,7 +169,7 @@ function Page() {
           </Link>
         </div>
       </div>
-    </SellerLayout>
+    </ModuleLayout>
   );
 }
 
