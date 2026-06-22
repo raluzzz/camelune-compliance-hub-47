@@ -46,7 +46,7 @@ function Page() {
 
       <h1 className="text-3xl text-ink mb-3">Submit packaging compliance — Germany</h1>
       <p className="text-sm text-muted-foreground max-w-2xl mb-10">
-        Four short steps. You can save your progress at any moment and return
+        A few short steps. You can save your progress at any moment and return
         later — your draft will be marked as such in the compliance center.
       </p>
 
@@ -54,58 +54,63 @@ function Page() {
 
       <div className="border border-line p-10 bg-background">
         {step === 0 && (
-          <FormRow
-            label="LUCID registration number"
-            help="Issued by ZSVR. Format: DE + 11 digits."
-          >
-            <input
-              value={eprNumber}
-              onChange={(e) => setEpr(e.target.value)}
-              className="w-full border border-line bg-background px-4 py-3 text-sm focus:outline-none focus:border-ink"
-            />
-          </FormRow>
+          <>
+            <FormRow
+              label="LUCID registration number"
+              help="Issued by ZSVR. Format: DE + 11 digits."
+            >
+              <input
+                value={eprNumber}
+                onChange={(e) => setEpr(e.target.value)}
+                className="w-full border border-line bg-background px-4 py-3 text-sm focus:outline-none focus:border-ink"
+              />
+            </FormRow>
+            <FormRow
+              label="Dual-system contract"
+              help="PDF, max 10MB. Must cover the 2026 reporting year."
+            >
+              <label className="block border border-dashed border-line p-8 text-center cursor-pointer hover:border-ink/40">
+                {doc ? (
+                  <div className="flex items-center justify-center gap-3 text-sm text-ink">
+                    <FileCheck2 className="h-5 w-5" strokeWidth={1.5} />
+                    {doc}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setDoc(null);
+                      }}
+                      className="text-xs text-muted-foreground underline ml-3"
+                    >
+                      Replace
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-muted-foreground">
+                    <Upload className="h-5 w-5 mx-auto mb-2" strokeWidth={1.5} />
+                    <p className="text-sm">Drop your contract here, or click to browse</p>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  hidden
+                  onChange={(e) =>
+                    setDoc(e.target.files?.[0]?.name ?? "der-gruene-punkt-2026.pdf")
+                  }
+                />
+              </label>
+            </FormRow>
+          </>
         )}
 
         {step === 1 && (
-          <FormRow
-            label="Dual-system contract"
-            help="PDF, max 10MB. Must cover the 2026 reporting year."
-          >
-            <label className="block border border-dashed border-line p-8 text-center cursor-pointer hover:border-ink/40">
-              {doc ? (
-                <div className="flex items-center justify-center gap-3 text-sm text-ink">
-                  <FileCheck2 className="h-5 w-5" strokeWidth={1.5} />
-                  {doc}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setDoc(null);
-                    }}
-                    className="text-xs text-muted-foreground underline ml-3"
-                  >
-                    Replace
-                  </button>
-                </div>
-              ) : (
-                <div className="text-muted-foreground">
-                  <Upload className="h-5 w-5 mx-auto mb-2" strokeWidth={1.5} />
-                  <p className="text-sm">Drop your contract here, or click to browse</p>
-                </div>
-              )}
-              <input
-                type="file"
-                hidden
-                onChange={(e) =>
-                  setDoc(e.target.files?.[0]?.name ?? "der-gruene-punkt-2026.pdf")
-                }
-              />
-            </label>
-          </FormRow>
-        )}
-
-        {step === 2 && (
           <>
+            <div className="pb-5 mb-2 border-b border-line">
+              <p className="text-[15px] text-ink">Authorized representative <span className="text-muted-foreground text-sm">(Optional)</span></p>
+              <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                Only required if your seller account is not established in Germany. You can skip this step and add it later.
+              </p>
+            </div>
             <FormRow label="Representative full name">
               <Input value={rep.name} onChange={(v) => setRep({ ...rep, name: v })} />
             </FormRow>
@@ -118,14 +123,10 @@ function Page() {
             <FormRow label="Registered address">
               <Input value={rep.address} onChange={(v) => setRep({ ...rep, address: v })} />
             </FormRow>
-            <p className="text-xs text-muted-foreground pt-2 border-t border-line mt-6">
-              Required because your seller account ({"Atelier Lune SRL — Romania"}) is
-              not established in Germany.
-            </p>
           </>
         )}
 
-        {step === 3 && (
+        {step === 2 && (
           <FormRow label="Confirmation">
             <label className="flex items-start gap-3 cursor-pointer">
               <input
@@ -144,6 +145,44 @@ function Page() {
           </FormRow>
         )}
       </div>
+
+      {/* Footer nav */}
+      <div className="flex justify-between mt-8">
+        <button
+          onClick={() => (step === 0 ? navigate({ to: "/seller/compliance/epr/packaging-germany" }) : setStep(step - 1))}
+          className="text-sm text-muted-foreground hover:text-ink"
+        >
+          ← {step === 0 ? "Cancel" : "Previous"}
+        </button>
+
+        <div className="flex items-center gap-4">
+          {step === 1 && (
+            <button
+              onClick={() => setStep(step + 1)}
+              className="text-xs uppercase tracking-[0.14em] text-muted-foreground hover:text-ink"
+            >
+              Skip this step
+            </button>
+          )}
+          {step < STEPS.length - 1 ? (
+            <button
+              onClick={() => setStep(step + 1)}
+              className="px-6 py-3 bg-ink text-primary-foreground text-xs uppercase tracking-[0.14em] hover:bg-ink/90"
+            >
+              Next step — {STEPS[step + 1].label}
+            </button>
+          ) : (
+            <button
+              disabled={!confirmed}
+              onClick={() => navigate({ to: "/seller/compliance/epr/packaging-germany/review" })}
+              className="px-6 py-3 bg-ink text-primary-foreground text-xs uppercase tracking-[0.14em] disabled:opacity-40 hover:bg-ink/90"
+            >
+              Continue to review
+            </button>
+          )}
+        </div>
+      </div>
+
 
       {/* Footer nav */}
       <div className="flex justify-between mt-8">
