@@ -118,27 +118,9 @@ const NEEDS = [
     desc: "An executed agreement with a licensed dual-system provider (e.g. Der Grüne Punkt, Interzero).",
   },
   {
-    title: "Authorized representative",
-    desc: "If applicable — sellers established outside Germany must appoint a German-resident representative.",
-  },
-  {
-    title: "Estimated annual packaging volumes",
-    desc: "Forecast in kilograms per material — paper, glass, plastic, aluminium, composites.",
+    title: "Authorized representative (optional)",
+    desc: "Sellers established outside Germany may appoint a German-resident representative.",
   },
 ];
 
-const AFFECTED = [
-  { sku: "CRY-2391", name: "Patek Philippe Nautilus 5711 — pre-owned", category: "Watches · Mechanical", shipping: "Direct ship" },
-  { sku: "CRY-2402", name: "Royal Oak 15500ST", category: "Watches · Mechanical", shipping: "Authenticated" },
-  { sku: "BAG-1180", name: "Hermès Kelly 25 — Étoupe", category: "Bags", shipping: "Authenticated" },
-  { sku: "APP-0540", name: "Brioni cashmere overcoat", category: "Apparel", shipping: "Direct ship" },
-];
-
-const REGULATOR = [
-  { label: "Regulator", value: "ZSVR — Stiftung Zentrale Stelle Verpackungsregister" },
-  { label: "Identifier", value: "LUCID registration number" },
-  { label: "Scheme", value: "Verpackungsgesetz (VerpackG)" },
-  { label: "Reporting cycle", value: "Annual declaration · monthly volumes" },
-  { label: "Required document", value: "Dual-system contract (e.g. Der Grüne Punkt, Interzero)" },
-  { label: "Authorized representative", value: "Required for sellers outside Germany" },
 ];
