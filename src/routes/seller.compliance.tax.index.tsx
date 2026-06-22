@@ -58,26 +58,6 @@ function Page() {
         </p>
       </section>
 
-      {/* What we may need */}
-      <section className="mb-14">
-        <h2 className="text-base text-ink mb-5">What we may need from you</h2>
-        <ul className="border-t border-line">
-          {[
-            "VAT identification number",
-            "OSS registration, if applicable",
-            "Destination threshold declaration",
-            "Shipping origin confirmation",
-            "Taxpayer identification number, where needed",
-          ].map((t) => (
-            <li
-              key={t}
-              className="text-sm text-ink py-4 border-b border-line"
-            >
-              {t}
-            </li>
-          ))}
-        </ul>
-      </section>
 
       {/* Saved information */}
       <section className="mb-14 space-y-5">
