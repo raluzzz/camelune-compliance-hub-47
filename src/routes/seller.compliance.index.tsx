@@ -52,11 +52,12 @@ const DOMAINS: Domain[] = [
     title: "DAC7 Reporting",
     status: "Not required yet",
     tone: "neutral",
-    text: "Provide seller reporting information required under EU platform tax reporting rules when applicable.",
+    text: "Becomes required if you exceed 30 sales or €2,000/year. You are not currently affected.",
     ctaLabel: "Open DAC7",
     to: "/seller/compliance/dac7",
   },
 ];
+
 
 interface ActionItem {
   title: string;
