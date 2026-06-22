@@ -127,10 +127,9 @@ function Page() {
       </div>
 
       {tab === "action" && <ActionRequired />}
-      {tab === "country" && <ByCountry />}
-      {tab === "type" && <ByType />}
-      {tab === "documents" && <SubmittedDocs />}
       {tab === "all" && <AllMatrix />}
+      {tab === "documents" && <SubmittedDocs />}
+
 
       <div id="faq">
         <FAQ items={EPR_FAQ} />
