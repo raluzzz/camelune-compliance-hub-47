@@ -15,11 +15,11 @@ export const Route = createFileRoute("/seller/compliance/epr/packaging-germany/s
 });
 
 const STEPS = [
-  { label: "EPR number" },
-  { label: "Document upload" },
-  { label: "Authorized representative" },
+  { label: "EPR number & document" },
+  { label: "Authorized representative (Optional)" },
   { label: "Confirmation" },
 ];
+
 
 function Page() {
   const [step, setStep] = useState(0);
