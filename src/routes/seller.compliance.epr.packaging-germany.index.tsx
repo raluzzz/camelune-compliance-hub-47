@@ -1,13 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { StatusBadge } from "@/components/seller/StatusBadge";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
 import { AlertCircle, ArrowRight } from "lucide-react";
+
 
 export const Route = createFileRoute("/seller/compliance/epr/packaging-germany/")({
   head: () => ({
