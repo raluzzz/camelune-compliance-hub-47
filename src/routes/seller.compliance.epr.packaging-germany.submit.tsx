@@ -183,33 +183,6 @@ function Page() {
         </div>
       </div>
 
-
-      {/* Footer nav */}
-      <div className="flex justify-between mt-8">
-        <button
-          onClick={() => (step === 0 ? navigate({ to: "/seller/compliance/epr/packaging-germany" }) : setStep(step - 1))}
-          className="text-sm text-muted-foreground hover:text-ink"
-        >
-          ← {step === 0 ? "Cancel" : "Previous"}
-        </button>
-
-        {step < STEPS.length - 1 ? (
-          <button
-            onClick={() => setStep(step + 1)}
-            className="px-6 py-3 bg-ink text-primary-foreground text-xs uppercase tracking-[0.14em] hover:bg-ink/90"
-          >
-            Next step — {STEPS[step + 1].label}
-          </button>
-        ) : (
-          <button
-            disabled={!confirmed}
-            onClick={() => navigate({ to: "/seller/compliance/epr/packaging-germany/review" })}
-            className="px-6 py-3 bg-ink text-primary-foreground text-xs uppercase tracking-[0.14em] disabled:opacity-40 hover:bg-ink/90"
-          >
-            Continue to review
-          </button>
-        )}
-      </div>
     </ModuleLayout>
   );
 }
