@@ -38,15 +38,14 @@ export const Route = createFileRoute("/seller/compliance/epr/")({
 const CATEGORIES: EprCategory[] = ["packaging", "batteries", "weee", "textiles"];
 const COUNTRIES: CountryCode[] = ["RO", "DE", "FR"];
 
-type Tab = "action" | "country" | "type" | "documents" | "all";
+type Tab = "action" | "all" | "documents";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "action", label: "Action required" },
-  { id: "country", label: "By country" },
-  { id: "type", label: "By requirement type" },
+  { id: "action", label: "Needs action" },
+  { id: "all", label: "All obligations" },
   { id: "documents", label: "Documents" },
-  { id: "all", label: "All requirements" },
 ];
+
 
 function Page() {
   const [tab, setTab] = useState<Tab>("action");
