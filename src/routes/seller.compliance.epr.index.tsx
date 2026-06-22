@@ -7,11 +7,19 @@ import {
   OBLIGATIONS,
   CATEGORY_LABEL,
   COUNTRY_LABEL,
+  STATUS_LABEL,
   statusGroup,
   type EprCategory,
   type CountryCode,
+  type Obligation,
 } from "@/lib/epr-data";
-import { ArrowRight, Info } from "lucide-react";
+import { ArrowRight, Info, ChevronRight } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/seller/compliance/epr/")({
   head: () => ({
@@ -36,7 +44,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "action", label: "Action required" },
   { id: "country", label: "By country" },
   { id: "type", label: "By requirement type" },
-  { id: "documents", label: "Submitted documents" },
+  { id: "documents", label: "Documents" },
   { id: "all", label: "All requirements" },
 ];
 
@@ -302,27 +310,219 @@ function ByType() {
   );
 }
 
+type DocState =
+  | "approved"
+  | "under-review"
+  | "rejected"
+  | "expiring-soon"
+  | "expired";
+
+function docState(o: Obligation): DocState | null {
+  switch (o.status) {
+    case "approved":
+      return "approved";
+    case "submitted":
+    case "under-review":
+    case "draft":
+      return "under-review";
+    case "rejected":
+    case "review-required":
+      return "rejected";
+    case "expiring-soon":
+      return "expiring-soon";
+    default:
+      return null;
+  }
+}
+
+function docFileName(o: Obligation) {
+  const cat = o.category;
+  const country = o.country.toLowerCase();
+  return `${cat}-${country}-2026.pdf`;
+}
+
+function docSubmittedDate(o: Obligation) {
+  switch (o.id) {
+    case "ro-pack":
+      return "12 Mar 2026";
+    case "ro-batt":
+      return "12 Mar 2026";
+    case "ro-tex":
+      return "12 Jun 2026 (draft)";
+    case "de-weee":
+      return "02 Jun 2026";
+    case "de-tex":
+      return "14 Aug 2024";
+    case "fr-pack":
+      return "08 Jan 2026";
+    case "fr-batt":
+      return "28 May 2026";
+    case "fr-weee":
+      return "22 Apr 2026";
+    case "fr-tex":
+      return "08 Jan 2026";
+    default:
+      return "—";
+  }
+}
+
 function SubmittedDocs() {
-  const docs = OBLIGATIONS.filter((o) =>
-    ["submitted", "under-review", "approved"].includes(o.status),
-  );
+  const [selected, setSelected] = useState<Obligation | null>(null);
+  const docs = OBLIGATIONS.filter((o) => docState(o) !== null);
+
   return (
-    <div className="border border-line divide-y divide-line bg-background">
-      {docs.map((o) => (
-        <div key={o.id} className="flex items-center justify-between px-6 py-5">
-          <div>
-            <p className="text-sm text-ink">
-              {CATEGORY_LABEL[o.category]} — {COUNTRY_LABEL[o.country]}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">{o.authority}</p>
-          </div>
-          <div className="flex items-center gap-5">
-            <span className="text-xs text-muted-foreground">{o.dueLabel}</span>
-            <StatusBadge status={o.status} />
-          </div>
+    <>
+      <div className="border border-line divide-y divide-line bg-background">
+        {docs.map((o) => (
+          <button
+            key={o.id}
+            onClick={() => setSelected(o)}
+            className="w-full text-left px-6 py-5 flex items-center justify-between gap-6 hover:bg-muted/40 transition-colors group"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-ink">
+                {CATEGORY_LABEL[o.category]} — {COUNTRY_LABEL[o.country]}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {o.authority} · {docFileName(o)}
+              </p>
+              {o.dueLabel && (
+                <p className="text-xs text-ink-soft mt-1">{o.dueLabel}</p>
+              )}
+            </div>
+            <div className="flex items-center gap-5 shrink-0">
+              <StatusBadge status={o.status} />
+              <ChevronRight
+                className="h-4 w-4 text-muted-foreground group-hover:text-ink transition-colors"
+                strokeWidth={1.5}
+              />
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <Sheet open={!!selected} onOpenChange={(v) => !v && setSelected(null)}>
+        <SheetContent className="w-full sm:max-w-[480px] bg-background border-l border-line p-0 overflow-y-auto">
+          {selected && <DocumentPanel obligation={selected} />}
+        </SheetContent>
+      </Sheet>
+    </>
+  );
+}
+
+function DocumentPanel({ obligation: o }: { obligation: Obligation }) {
+  const state = docState(o);
+
+  return (
+    <div className="px-8 py-10">
+      <SheetHeader className="text-left space-y-3 mb-8">
+        <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+          {COUNTRY_LABEL[o.country]}
+        </p>
+        <SheetTitle className="text-[22px] font-normal text-ink">
+          {CATEGORY_LABEL[o.category]}
+        </SheetTitle>
+        <div>
+          <StatusBadge status={o.status} />
         </div>
-      ))}
+      </SheetHeader>
+
+      <dl className="text-sm divide-y divide-line border-t border-b border-line">
+        <Row k="Status" v={STATUS_LABEL[o.status]} />
+        <Row k="Authority" v={o.authority} />
+        <Row k="Submitted" v={docSubmittedDate(o)} />
+        {o.dueLabel && <Row k="Renews / due" v={o.dueLabel} />}
+        <Row k="Document" v={docFileName(o)} />
+        {o.affectedProducts > 0 && (
+          <Row k="Affected listings" v={`${o.affectedProducts}`} />
+        )}
+      </dl>
+
+      {o.note && (
+        <p className="text-sm text-muted-foreground leading-relaxed mt-6">
+          {state === "rejected" ? "Reason: " : ""}
+          {o.note}
+        </p>
+      )}
+
+      <div className="mt-8 space-y-2">
+        <DocActions state={state} />
+      </div>
+
+      <div className="mt-8 pt-6 border-t border-line">
+        <Link
+          to="/seller/compliance/epr/packaging-germany"
+          className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70"
+        >
+          View requirement details
+          <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} />
+        </Link>
+      </div>
     </div>
+  );
+}
+
+function Row({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="grid grid-cols-[140px_1fr] py-3">
+      <dt className="text-muted-foreground">{k}</dt>
+      <dd className="text-ink">{v}</dd>
+    </div>
+  );
+}
+
+function DocActions({ state }: { state: DocState | null }) {
+  const actions: { label: string; primary?: boolean }[] = (() => {
+    switch (state) {
+      case "approved":
+        return [
+          { label: "View document" },
+          { label: "Download" },
+          { label: "Replace document" },
+        ];
+      case "under-review":
+        return [
+          { label: "View submission" },
+          { label: "Replace document" },
+          { label: "Contact support" },
+        ];
+      case "rejected":
+        return [
+          { label: "Upload corrected document", primary: true },
+          { label: "View rejection reason" },
+        ];
+      case "expiring-soon":
+        return [
+          { label: "Renew document", primary: true },
+          { label: "Upload new proof" },
+        ];
+      case "expired":
+        return [{ label: "Renew now", primary: true }];
+      default:
+        return [];
+    }
+  })();
+
+  return (
+    <>
+      {actions.map((a) =>
+        a.primary ? (
+          <button
+            key={a.label}
+            className="w-full h-11 bg-ink text-cream text-xs uppercase tracking-[0.16em] hover:bg-ink/90"
+          >
+            {a.label}
+          </button>
+        ) : (
+          <button
+            key={a.label}
+            className="w-full h-11 border border-line text-xs uppercase tracking-[0.16em] text-ink hover:bg-muted/40"
+          >
+            {a.label}
+          </button>
+        ),
+      )}
+    </>
   );
 }
 
