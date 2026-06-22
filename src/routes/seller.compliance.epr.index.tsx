@@ -44,7 +44,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "action", label: "Action required" },
   { id: "country", label: "By country" },
   { id: "type", label: "By requirement type" },
-  { id: "documents", label: "Submitted documents" },
+  { id: "documents", label: "Documents" },
   { id: "all", label: "All requirements" },
 ];
 
