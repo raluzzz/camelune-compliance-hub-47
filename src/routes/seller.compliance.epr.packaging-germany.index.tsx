@@ -1,13 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { StatusBadge } from "@/components/seller/StatusBadge";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
 import { AlertCircle, ArrowRight } from "lucide-react";
+
 
 export const Route = createFileRoute("/seller/compliance/epr/packaging-germany/")({
   head: () => ({
@@ -46,7 +41,7 @@ function Page() {
         </header>
 
         {/* Alert card */}
-        <div className="border border-rose-200/70 bg-rose-50/40 p-6 mb-12">
+        <div className="border border-rose-200/70 bg-rose-50/40 p-6 mb-6">
           <div className="flex items-start gap-4">
             <AlertCircle className="h-5 w-5 text-rose-700 mt-0.5 shrink-0" strokeWidth={1.5} />
             <div className="flex-1">
@@ -59,14 +54,15 @@ function Page() {
               </p>
             </div>
           </div>
-          <div className="mt-6 flex justify-end">
-            <Link
-              to="/seller/compliance/epr/packaging-germany/submit"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-primary-foreground text-xs uppercase tracking-[0.16em] hover:bg-ink/90"
-            >
-              Complete now <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} />
-            </Link>
-          </div>
+        </div>
+
+        <div className="mb-14">
+          <Link
+            to="/seller/compliance/epr"
+            className="text-sm text-muted-foreground hover:text-ink inline-flex items-center gap-1"
+          >
+            More info about German packaging EPR (VerpackG / LUCID) →
+          </Link>
         </div>
 
         {/* What you need */}
@@ -92,67 +88,6 @@ function Page() {
           </ol>
         </section>
 
-        {/* Secondary collapsed details */}
-        <Accordion type="single" collapsible className="mb-14">
-          <AccordionItem value="affected" className="border-b border-line">
-            <AccordionTrigger className="text-sm text-ink hover:no-underline">
-              <span>
-                Affected listings
-                <span className="text-muted-foreground ml-2 font-normal">
-                  31 listings
-                </span>
-              </span>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="border border-line divide-y divide-line">
-                {AFFECTED.map((row) => (
-                  <div
-                    key={row.sku}
-                    className="grid grid-cols-[100px_1fr_160px_120px] items-center px-5 py-3.5"
-                  >
-                    <span className="text-xs text-muted-foreground">{row.sku}</span>
-                    <span className="text-sm text-ink">{row.name}</span>
-                    <span className="text-xs text-muted-foreground">{row.category}</span>
-                    <span className="text-xs text-right text-muted-foreground">{row.shipping}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground mt-3">
-                Showing 4 of 31 affected listings.
-              </p>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="legal" className="border-b border-line">
-            <AccordionTrigger className="text-sm text-ink hover:no-underline">
-              Legal details
-            </AccordionTrigger>
-            <AccordionContent>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Verpackungsgesetz (VerpackG) requires every seller placing
-                packaged goods on the German market to register with ZSVR
-                (the LUCID database) and contract a dual-system provider
-                before any shipment enters Germany.
-              </p>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="regulator" className="border-b border-line">
-            <AccordionTrigger className="text-sm text-ink hover:no-underline">
-              Regulator information
-            </AccordionTrigger>
-            <AccordionContent>
-              <dl className="text-sm divide-y divide-line">
-                {REGULATOR.map((r) => (
-                  <div key={r.label} className="grid grid-cols-[200px_1fr] py-3">
-                    <dt className="text-muted-foreground">{r.label}</dt>
-                    <dd className="text-ink">{r.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
 
         <div className="border-t border-line pt-8 flex justify-between items-center">
           <Link
@@ -183,27 +118,8 @@ const NEEDS = [
     desc: "An executed agreement with a licensed dual-system provider (e.g. Der Grüne Punkt, Interzero).",
   },
   {
-    title: "Authorized representative",
-    desc: "If applicable — sellers established outside Germany must appoint a German-resident representative.",
-  },
-  {
-    title: "Estimated annual packaging volumes",
-    desc: "Forecast in kilograms per material — paper, glass, plastic, aluminium, composites.",
+    title: "Authorized representative (optional)",
+    desc: "Sellers established outside Germany may appoint a German-resident representative.",
   },
 ];
 
-const AFFECTED = [
-  { sku: "CRY-2391", name: "Patek Philippe Nautilus 5711 — pre-owned", category: "Watches · Mechanical", shipping: "Direct ship" },
-  { sku: "CRY-2402", name: "Royal Oak 15500ST", category: "Watches · Mechanical", shipping: "Authenticated" },
-  { sku: "BAG-1180", name: "Hermès Kelly 25 — Étoupe", category: "Bags", shipping: "Authenticated" },
-  { sku: "APP-0540", name: "Brioni cashmere overcoat", category: "Apparel", shipping: "Direct ship" },
-];
-
-const REGULATOR = [
-  { label: "Regulator", value: "ZSVR — Stiftung Zentrale Stelle Verpackungsregister" },
-  { label: "Identifier", value: "LUCID registration number" },
-  { label: "Scheme", value: "Verpackungsgesetz (VerpackG)" },
-  { label: "Reporting cycle", value: "Annual declaration · monthly volumes" },
-  { label: "Required document", value: "Dual-system contract (e.g. Der Grüne Punkt, Interzero)" },
-  { label: "Authorized representative", value: "Required for sellers outside Germany" },
-];
