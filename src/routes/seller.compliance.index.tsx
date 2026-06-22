@@ -102,13 +102,7 @@ function Page() {
           </p>
         </header>
 
-        <section className="grid grid-cols-3 gap-6 mb-16">
-          {DOMAINS.map((d) => (
-            <DomainCard key={d.title} {...d} />
-          ))}
-        </section>
-
-        <section>
+        <section className="mb-16">
           <div className="flex items-baseline justify-between mb-5">
             <h2 className="text-lg text-ink">Action required</h2>
             <span className="text-xs text-muted-foreground">
@@ -135,6 +129,13 @@ function Page() {
             ))}
           </div>
         </section>
+
+        <section className="grid grid-cols-3 gap-6">
+          {DOMAINS.map((d) => (
+            <DomainCard key={d.title} {...d} />
+          ))}
+        </section>
+
       </div>
     </SellerLayout>
   );
