@@ -7,11 +7,19 @@ import {
   OBLIGATIONS,
   CATEGORY_LABEL,
   COUNTRY_LABEL,
+  STATUS_LABEL,
   statusGroup,
   type EprCategory,
   type CountryCode,
+  type Obligation,
 } from "@/lib/epr-data";
-import { ArrowRight, Info } from "lucide-react";
+import { ArrowRight, Info, ChevronRight } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/seller/compliance/epr/")({
   head: () => ({
