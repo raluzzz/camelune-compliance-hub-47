@@ -43,7 +43,8 @@ export const Route = createFileRoute("/seller/compliance/epr/r/$slug")({
 });
 
 function Page() {
-  const { obligation: o } = Route.useLoaderData();
+  const data = Route.useLoaderData();
+  const o = data.obligation as Obligation;
   const spec = DETAIL_SPECS[`${o.category}-${o.country.toLowerCase()}`];
   const [submitted, setSubmitted] = useState(false);
 
