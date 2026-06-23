@@ -17,6 +17,7 @@ import { Route as SellerComplianceDac7IndexRouteImport } from './routes/seller.c
 import { Route as SellerComplianceEprByTypeRouteImport } from './routes/seller.compliance.epr.by-type'
 import { Route as SellerComplianceEprByCountryRouteImport } from './routes/seller.compliance.epr.by-country'
 import { Route as SellerComplianceEprPackagingGermanyIndexRouteImport } from './routes/seller.compliance.epr.packaging-germany.index'
+import { Route as SellerComplianceEprRSlugRouteImport } from './routes/seller.compliance.epr.r.$slug'
 import { Route as SellerComplianceEprPackagingGermanySubmittedRouteImport } from './routes/seller.compliance.epr.packaging-germany.submitted'
 import { Route as SellerComplianceEprPackagingGermanySubmitRouteImport } from './routes/seller.compliance.epr.packaging-germany.submit'
 import { Route as SellerComplianceEprPackagingGermanyReviewRouteImport } from './routes/seller.compliance.epr.packaging-germany.review'
@@ -68,6 +69,12 @@ const SellerComplianceEprPackagingGermanyIndexRoute =
     path: '/seller/compliance/epr/packaging-germany/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SellerComplianceEprRSlugRoute =
+  SellerComplianceEprRSlugRouteImport.update({
+    id: '/seller/compliance/epr/r/$slug',
+    path: '/seller/compliance/epr/r/$slug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const SellerComplianceEprPackagingGermanySubmittedRoute =
   SellerComplianceEprPackagingGermanySubmittedRouteImport.update({
     id: '/seller/compliance/epr/packaging-germany/submitted',
@@ -105,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/seller/compliance/epr/packaging-germany/review': typeof SellerComplianceEprPackagingGermanyReviewRoute
   '/seller/compliance/epr/packaging-germany/submit': typeof SellerComplianceEprPackagingGermanySubmitRoute
   '/seller/compliance/epr/packaging-germany/submitted': typeof SellerComplianceEprPackagingGermanySubmittedRoute
+  '/seller/compliance/epr/r/$slug': typeof SellerComplianceEprRSlugRoute
   '/seller/compliance/epr/packaging-germany/': typeof SellerComplianceEprPackagingGermanyIndexRoute
 }
 export interface FileRoutesByTo {
@@ -119,6 +127,7 @@ export interface FileRoutesByTo {
   '/seller/compliance/epr/packaging-germany/review': typeof SellerComplianceEprPackagingGermanyReviewRoute
   '/seller/compliance/epr/packaging-germany/submit': typeof SellerComplianceEprPackagingGermanySubmitRoute
   '/seller/compliance/epr/packaging-germany/submitted': typeof SellerComplianceEprPackagingGermanySubmittedRoute
+  '/seller/compliance/epr/r/$slug': typeof SellerComplianceEprRSlugRoute
   '/seller/compliance/epr/packaging-germany': typeof SellerComplianceEprPackagingGermanyIndexRoute
 }
 export interface FileRoutesById {
@@ -134,6 +143,7 @@ export interface FileRoutesById {
   '/seller/compliance/epr/packaging-germany/review': typeof SellerComplianceEprPackagingGermanyReviewRoute
   '/seller/compliance/epr/packaging-germany/submit': typeof SellerComplianceEprPackagingGermanySubmitRoute
   '/seller/compliance/epr/packaging-germany/submitted': typeof SellerComplianceEprPackagingGermanySubmittedRoute
+  '/seller/compliance/epr/r/$slug': typeof SellerComplianceEprRSlugRoute
   '/seller/compliance/epr/packaging-germany/': typeof SellerComplianceEprPackagingGermanyIndexRoute
 }
 export interface FileRouteTypes {
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/seller/compliance/epr/packaging-germany/review'
     | '/seller/compliance/epr/packaging-germany/submit'
     | '/seller/compliance/epr/packaging-germany/submitted'
+    | '/seller/compliance/epr/r/$slug'
     | '/seller/compliance/epr/packaging-germany/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/seller/compliance/epr/packaging-germany/review'
     | '/seller/compliance/epr/packaging-germany/submit'
     | '/seller/compliance/epr/packaging-germany/submitted'
+    | '/seller/compliance/epr/r/$slug'
     | '/seller/compliance/epr/packaging-germany'
   id:
     | '__root__'
@@ -178,6 +190,7 @@ export interface FileRouteTypes {
     | '/seller/compliance/epr/packaging-germany/review'
     | '/seller/compliance/epr/packaging-germany/submit'
     | '/seller/compliance/epr/packaging-germany/submitted'
+    | '/seller/compliance/epr/r/$slug'
     | '/seller/compliance/epr/packaging-germany/'
   fileRoutesById: FileRoutesById
 }
@@ -193,6 +206,7 @@ export interface RootRouteChildren {
   SellerComplianceEprPackagingGermanyReviewRoute: typeof SellerComplianceEprPackagingGermanyReviewRoute
   SellerComplianceEprPackagingGermanySubmitRoute: typeof SellerComplianceEprPackagingGermanySubmitRoute
   SellerComplianceEprPackagingGermanySubmittedRoute: typeof SellerComplianceEprPackagingGermanySubmittedRoute
+  SellerComplianceEprRSlugRoute: typeof SellerComplianceEprRSlugRoute
   SellerComplianceEprPackagingGermanyIndexRoute: typeof SellerComplianceEprPackagingGermanyIndexRoute
 }
 
@@ -254,6 +268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerComplianceEprPackagingGermanyIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/seller/compliance/epr/r/$slug': {
+      id: '/seller/compliance/epr/r/$slug'
+      path: '/seller/compliance/epr/r/$slug'
+      fullPath: '/seller/compliance/epr/r/$slug'
+      preLoaderRoute: typeof SellerComplianceEprRSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/seller/compliance/epr/packaging-germany/submitted': {
       id: '/seller/compliance/epr/packaging-germany/submitted'
       path: '/seller/compliance/epr/packaging-germany/submitted'
@@ -300,6 +321,7 @@ const rootRouteChildren: RootRouteChildren = {
     SellerComplianceEprPackagingGermanySubmitRoute,
   SellerComplianceEprPackagingGermanySubmittedRoute:
     SellerComplianceEprPackagingGermanySubmittedRoute,
+  SellerComplianceEprRSlugRoute: SellerComplianceEprRSlugRoute,
   SellerComplianceEprPackagingGermanyIndexRoute:
     SellerComplianceEprPackagingGermanyIndexRoute,
 }

@@ -24,7 +24,7 @@ export const Route = createFileRoute("/seller/compliance/epr/r/$slug")({
   head: ({ params }) => ({
     meta: [{ title: `${params.slug} — EPR — Camelune` }],
   }),
-  loader: ({ params }) => {
+  loader: ({ params }): { obligation: Obligation } => {
     const o = findObligationBySlug(params.slug);
     if (!o) throw notFound();
     return { obligation: o };
