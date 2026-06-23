@@ -20,6 +20,7 @@ import { Route as SellerComplianceEprPackagingGermanyIndexRouteImport } from './
 import { Route as SellerComplianceEprPackagingGermanySubmittedRouteImport } from './routes/seller.compliance.epr.packaging-germany.submitted'
 import { Route as SellerComplianceEprPackagingGermanySubmitRouteImport } from './routes/seller.compliance.epr.packaging-germany.submit'
 import { Route as SellerComplianceEprPackagingGermanyReviewRouteImport } from './routes/seller.compliance.epr.packaging-germany.review'
+import { Route as SellerComplianceDac7ReportYearRouteImport } from './routes/seller.compliance.dac7.report.$year'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -85,6 +86,12 @@ const SellerComplianceEprPackagingGermanyReviewRoute =
     path: '/seller/compliance/epr/packaging-germany/review',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SellerComplianceDac7ReportYearRoute =
+  SellerComplianceDac7ReportYearRouteImport.update({
+    id: '/seller/compliance/dac7/report/$year',
+    path: '/seller/compliance/dac7/report/$year',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/seller/compliance/dac7/': typeof SellerComplianceDac7IndexRoute
   '/seller/compliance/epr/': typeof SellerComplianceEprIndexRoute
   '/seller/compliance/tax/': typeof SellerComplianceTaxIndexRoute
+  '/seller/compliance/dac7/report/$year': typeof SellerComplianceDac7ReportYearRoute
   '/seller/compliance/epr/packaging-germany/review': typeof SellerComplianceEprPackagingGermanyReviewRoute
   '/seller/compliance/epr/packaging-germany/submit': typeof SellerComplianceEprPackagingGermanySubmitRoute
   '/seller/compliance/epr/packaging-germany/submitted': typeof SellerComplianceEprPackagingGermanySubmittedRoute
@@ -107,6 +115,7 @@ export interface FileRoutesByTo {
   '/seller/compliance/dac7': typeof SellerComplianceDac7IndexRoute
   '/seller/compliance/epr': typeof SellerComplianceEprIndexRoute
   '/seller/compliance/tax': typeof SellerComplianceTaxIndexRoute
+  '/seller/compliance/dac7/report/$year': typeof SellerComplianceDac7ReportYearRoute
   '/seller/compliance/epr/packaging-germany/review': typeof SellerComplianceEprPackagingGermanyReviewRoute
   '/seller/compliance/epr/packaging-germany/submit': typeof SellerComplianceEprPackagingGermanySubmitRoute
   '/seller/compliance/epr/packaging-germany/submitted': typeof SellerComplianceEprPackagingGermanySubmittedRoute
@@ -121,6 +130,7 @@ export interface FileRoutesById {
   '/seller/compliance/dac7/': typeof SellerComplianceDac7IndexRoute
   '/seller/compliance/epr/': typeof SellerComplianceEprIndexRoute
   '/seller/compliance/tax/': typeof SellerComplianceTaxIndexRoute
+  '/seller/compliance/dac7/report/$year': typeof SellerComplianceDac7ReportYearRoute
   '/seller/compliance/epr/packaging-germany/review': typeof SellerComplianceEprPackagingGermanyReviewRoute
   '/seller/compliance/epr/packaging-germany/submit': typeof SellerComplianceEprPackagingGermanySubmitRoute
   '/seller/compliance/epr/packaging-germany/submitted': typeof SellerComplianceEprPackagingGermanySubmittedRoute
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/seller/compliance/dac7/'
     | '/seller/compliance/epr/'
     | '/seller/compliance/tax/'
+    | '/seller/compliance/dac7/report/$year'
     | '/seller/compliance/epr/packaging-germany/review'
     | '/seller/compliance/epr/packaging-germany/submit'
     | '/seller/compliance/epr/packaging-germany/submitted'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/seller/compliance/dac7'
     | '/seller/compliance/epr'
     | '/seller/compliance/tax'
+    | '/seller/compliance/dac7/report/$year'
     | '/seller/compliance/epr/packaging-germany/review'
     | '/seller/compliance/epr/packaging-germany/submit'
     | '/seller/compliance/epr/packaging-germany/submitted'
@@ -162,6 +174,7 @@ export interface FileRouteTypes {
     | '/seller/compliance/dac7/'
     | '/seller/compliance/epr/'
     | '/seller/compliance/tax/'
+    | '/seller/compliance/dac7/report/$year'
     | '/seller/compliance/epr/packaging-germany/review'
     | '/seller/compliance/epr/packaging-germany/submit'
     | '/seller/compliance/epr/packaging-germany/submitted'
@@ -176,6 +189,7 @@ export interface RootRouteChildren {
   SellerComplianceDac7IndexRoute: typeof SellerComplianceDac7IndexRoute
   SellerComplianceEprIndexRoute: typeof SellerComplianceEprIndexRoute
   SellerComplianceTaxIndexRoute: typeof SellerComplianceTaxIndexRoute
+  SellerComplianceDac7ReportYearRoute: typeof SellerComplianceDac7ReportYearRoute
   SellerComplianceEprPackagingGermanyReviewRoute: typeof SellerComplianceEprPackagingGermanyReviewRoute
   SellerComplianceEprPackagingGermanySubmitRoute: typeof SellerComplianceEprPackagingGermanySubmitRoute
   SellerComplianceEprPackagingGermanySubmittedRoute: typeof SellerComplianceEprPackagingGermanySubmittedRoute
@@ -261,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SellerComplianceEprPackagingGermanyReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/seller/compliance/dac7/report/$year': {
+      id: '/seller/compliance/dac7/report/$year'
+      path: '/seller/compliance/dac7/report/$year'
+      fullPath: '/seller/compliance/dac7/report/$year'
+      preLoaderRoute: typeof SellerComplianceDac7ReportYearRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -272,6 +293,7 @@ const rootRouteChildren: RootRouteChildren = {
   SellerComplianceDac7IndexRoute: SellerComplianceDac7IndexRoute,
   SellerComplianceEprIndexRoute: SellerComplianceEprIndexRoute,
   SellerComplianceTaxIndexRoute: SellerComplianceTaxIndexRoute,
+  SellerComplianceDac7ReportYearRoute: SellerComplianceDac7ReportYearRoute,
   SellerComplianceEprPackagingGermanyReviewRoute:
     SellerComplianceEprPackagingGermanyReviewRoute,
   SellerComplianceEprPackagingGermanySubmitRoute:
