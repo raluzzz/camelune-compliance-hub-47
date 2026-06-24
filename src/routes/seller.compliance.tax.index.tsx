@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { FAQ } from "@/components/seller/FAQ";
 import { EditModal } from "@/components/seller/EditModal";
+import { HelpLink } from "@/components/seller/HelpLink";
 import {
   Accordion,
   AccordionContent,
@@ -58,20 +59,31 @@ function Page() {
         </p>
       </header>
 
-      {/* Educational */}
-      <section className="border border-line bg-cream/40 p-7 mb-8">
-        <div className="flex items-start gap-4">
-          <Info className="h-5 w-5 text-ink-soft mt-0.5 shrink-0" strokeWidth={1.5} />
-          <div className="flex-1">
-            <p className="text-[15px] text-ink">Why we ask for Tax & VAT information</p>
-            <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+      {/* Educational — collapsed by default (Global Rule) */}
+      <Accordion type="single" collapsible className="mb-8">
+        <AccordionItem value="why" className="border border-line bg-cream/40">
+          <AccordionTrigger className="px-7 py-5 hover:no-underline">
+            <div className="flex items-center gap-4 text-left">
+              <Info className="h-5 w-5 text-ink-soft shrink-0" strokeWidth={1.5} />
+              <span className="text-[15px] text-ink">
+                Why we ask for Tax & VAT information
+              </span>
+              <span className="text-xs text-muted-foreground ml-2">Learn more</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-7 pb-6 pl-[60px]">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Camelune uses your tax and VAT information to understand how
               your seller account can operate across destination countries
               and whether additional VAT details are required.
             </p>
-          </div>
-        </div>
-      </section>
+            <div className="pt-3">
+              {/* TODO: activate when Help Center is published */}
+              <HelpLink inline label="Learn more" href="/help/tax-vat" />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Status */}
       <section className="border border-line bg-background p-7 mb-10">

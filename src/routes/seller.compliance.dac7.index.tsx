@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { FAQ } from "@/components/seller/FAQ";
 import { EditModal } from "@/components/seller/EditModal";
+import { HelpLink } from "@/components/seller/HelpLink";
 import {
   Accordion,
   AccordionContent,
@@ -13,6 +14,7 @@ import {
   Info,
   CheckCircle2,
   AlertTriangle,
+  Send,
   ArrowRight,
   ArrowUpRight,
 } from "lucide-react";
@@ -56,18 +58,47 @@ function Page() {
         </p>
       </header>
 
-      {/* What is DAC7 */}
-      <InfoCard title="What is DAC7?">
-        <p>
-          DAC7 may require digital platforms to collect, verify and report
-          information about sellers and the income they earn through the
-          platform.
-        </p>
-        <p className="mt-3">
-          DAC7 is not a new tax. It is a reporting obligation for digital
-          platforms.
-        </p>
-      </InfoCard>
+      {/* What is DAC7 — collapsible, closed by default (Global Rule) */}
+      <Accordion type="single" collapsible className="mb-8">
+        <AccordionItem
+          value="what"
+          className="border border-line bg-cream/40"
+        >
+          <AccordionTrigger className="px-7 py-5 hover:no-underline">
+            <div className="flex items-center gap-4 text-left">
+              <Info
+                className="h-5 w-5 text-ink-soft shrink-0"
+                strokeWidth={1.5}
+              />
+              <span className="text-[15px] text-ink">What is DAC7?</span>
+              <span className="text-xs text-muted-foreground ml-2">
+                Learn more
+              </span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-7 pb-6 pl-[60px]">
+            <div className="text-sm text-muted-foreground leading-relaxed space-y-3">
+              <p>
+                DAC7 may require digital platforms to collect, verify and
+                report information about sellers and the income they earn
+                through the platform.
+              </p>
+              <p>
+                DAC7 is not a new tax. It is a reporting obligation for
+                digital platforms.
+              </p>
+              <div className="pt-2">
+                {/* TODO: activate when Help Center is published */}
+                <HelpLink
+                  inline
+                  label="Learn more"
+                  href="/help/dac7"
+                />
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Status card */}
       <section className="border border-line bg-background p-7 mb-8">
@@ -164,31 +195,72 @@ function Page() {
         </p>
       </InfoCard>
 
-      {/* Collapsible — Information used for DAC7 */}
-      <Accordion type="multiple" className="mb-3">
-        <AccordionItem value="info-used" className="border border-line bg-background">
-          <AccordionTrigger className="px-6 py-5 text-[15px] text-ink hover:no-underline">
-            Information used for DAC7
-          </AccordionTrigger>
-          <AccordionContent className="px-6 pb-6">
-            <div className="border border-line bg-cream/40 p-5 mb-5">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                When DAC7 reporting becomes required, Camelune uses
-                information already saved in your seller account. You can
-                review and update it below.
-              </p>
-            </div>
-            <ul className="text-sm text-ink space-y-2">
-              <li>· Company details</li>
-              <li>· Commercial registration number</li>
-              <li>· Taxpayer ID</li>
-              <li>· VAT ID</li>
-              <li>· Payout account</li>
-              <li>· Transaction totals calculated by Camelune</li>
-            </ul>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      {/* Information used for DAC7 — always open per GDPR transparency */}
+      <section className="border border-line bg-background p-7 mb-3">
+        <div className="flex items-start justify-between gap-6 mb-5">
+          <div>
+            <p className="text-[15px] text-ink">Information used for DAC7</p>
+            <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-2xl">
+              When DAC7 reporting becomes required, Camelune uses
+              information already saved in your seller account.
+            </p>
+          </div>
+          {/* TODO: activate when Help Center is published */}
+          <HelpLink
+            inline
+            label="View how Camelune uses your data"
+            href="/help/dac7/data-privacy"
+          />
+        </div>
+        <ul className="text-sm text-ink space-y-2">
+          <li>· Company details</li>
+          <li>· Commercial registration number</li>
+          <li>· Taxpayer ID</li>
+          <li>· VAT ID</li>
+          <li>· Payout account</li>
+          <li>· Transaction totals calculated by Camelune</li>
+        </ul>
+        <p className="text-xs text-muted-foreground mt-5 leading-relaxed">
+          This information is only shared with tax authorities when the
+          reporting thresholds above are met. It is processed in accordance
+          with GDPR and Camelune's Privacy Policy.
+        </p>
+      </section>
+
+      {/* What happens when you are reported */}
+      <section className="border border-line bg-background p-7 mb-8">
+        <div className="flex items-start gap-4 mb-4">
+          <Send className="h-5 w-5 text-ink-soft mt-0.5 shrink-0" strokeWidth={1.5} />
+          <p className="text-[15px] text-ink">
+            What happens when you are reported
+          </p>
+        </div>
+        <ul className="text-sm text-muted-foreground space-y-3 leading-relaxed pl-9">
+          <li>
+            Camelune submits your seller information and transaction data to
+            the Romanian tax authority (ANAF) by 31 January each year, for
+            the previous calendar year.
+          </li>
+          <li>
+            You will receive an email notification when your report has been
+            submitted, with a reference number and a link to view the full
+            report in your account.
+          </li>
+          <li>
+            You do not need to take any action. The report is submitted by
+            Camelune on your behalf.
+          </li>
+          <li>
+            The tax authority may use this information to cross-check your
+            existing tax declarations. You should ensure your personal
+            income declarations are up to date.
+          </li>
+          <li>
+            If the tax authority has questions, they will contact you
+            directly — not through Camelune.
+          </li>
+        </ul>
+      </section>
 
       {/* Collapsible — Saved seller information */}
       <Accordion type="multiple" defaultValue={["saved"]} className="mb-10">
@@ -329,13 +401,18 @@ function Page() {
         </AccordionItem>
       </Accordion>
 
-      {/* Helpful links */}
+      {/* Helpful links — TODO: activate when Help Center is published */}
       <section className="border border-line bg-background p-7 mb-12">
         <p className="text-[15px] text-ink mb-4">Helpful links</p>
         <ul className="space-y-3 text-sm">
-          <HelpLink label="Learn more about DAC7" />
-          <HelpLink label="View how Camelune uses your data" />
-          <HelpLink label="Contact support" />
+          <li><HelpLink label="Learn more about DAC7" href="/help/dac7" /></li>
+          <li><HelpLink label="View how Camelune uses your data" href="/help/dac7/data-privacy" /></li>
+          <li>
+            <a href="/seller/help" className="inline-flex items-center gap-2 text-sm text-ink hover:opacity-70">
+              Contact support
+              <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
+            </a>
+          </li>
         </ul>
       </section>
 
@@ -512,19 +589,9 @@ function ReportRow({
   );
 }
 
-function HelpLink({ label }: { label: string }) {
-  return (
-    <li>
-      <a href="#" className="inline-flex items-center gap-2 text-ink hover:opacity-70">
-        {label}
-        <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
-      </a>
-    </li>
-  );
-}
 
 const DAC7_FAQ = [
-  { q: "What is DAC7?", a: "DAC7 is an EU directive that requires digital platforms to report seller identification and income information to tax authorities." },
+  // "What is DAC7?" moved to collapsible card at top (Global Rule: no duplicates)
   { q: "Is DAC7 a new tax?", a: "No. DAC7 is not a new tax. It is a reporting obligation for digital platforms." },
   { q: "Why does Camelune need this information?", a: "Camelune must determine whether reporting is required and file accurate reports if you meet the thresholds." },
   { q: "When will I be reported?", a: "When you reach at least 30 sales or €2,000 in total transaction value during a calendar year. Reaching either threshold triggers reporting." },
