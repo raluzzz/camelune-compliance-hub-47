@@ -360,13 +360,18 @@ function Page() {
         </AccordionItem>
       </Accordion>
 
-      {/* Helpful links */}
+      {/* Helpful links — TODO: activate when Help Center is published */}
       <section className="border border-line bg-background p-7 mb-12">
         <p className="text-[15px] text-ink mb-4">Helpful links</p>
         <ul className="space-y-3 text-sm">
-          <HelpLink label="Learn more about DAC7" />
-          <HelpLink label="View how Camelune uses your data" />
-          <HelpLink label="Contact support" />
+          <li><HelpLink label="Learn more about DAC7" href="/help/dac7" /></li>
+          <li><HelpLink label="View how Camelune uses your data" href="/help/dac7/data-privacy" /></li>
+          <li>
+            <a href="/seller/help" className="inline-flex items-center gap-2 text-sm text-ink hover:opacity-70">
+              Contact support
+              <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
+            </a>
+          </li>
         </ul>
       </section>
 
@@ -543,19 +548,9 @@ function ReportRow({
   );
 }
 
-function HelpLink({ label }: { label: string }) {
-  return (
-    <li>
-      <a href="#" className="inline-flex items-center gap-2 text-ink hover:opacity-70">
-        {label}
-        <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
-      </a>
-    </li>
-  );
-}
 
 const DAC7_FAQ = [
-  { q: "What is DAC7?", a: "DAC7 is an EU directive that requires digital platforms to report seller identification and income information to tax authorities." },
+  // "What is DAC7?" moved to collapsible card at top (Global Rule: no duplicates)
   { q: "Is DAC7 a new tax?", a: "No. DAC7 is not a new tax. It is a reporting obligation for digital platforms." },
   { q: "Why does Camelune need this information?", a: "Camelune must determine whether reporting is required and file accurate reports if you meet the thresholds." },
   { q: "When will I be reported?", a: "When you reach at least 30 sales or €2,000 in total transaction value during a calendar year. Reaching either threshold triggers reporting." },
