@@ -195,31 +195,72 @@ function Page() {
         </p>
       </InfoCard>
 
-      {/* Collapsible — Information used for DAC7 */}
-      <Accordion type="multiple" className="mb-3">
-        <AccordionItem value="info-used" className="border border-line bg-background">
-          <AccordionTrigger className="px-6 py-5 text-[15px] text-ink hover:no-underline">
-            Information used for DAC7
-          </AccordionTrigger>
-          <AccordionContent className="px-6 pb-6">
-            <div className="border border-line bg-cream/40 p-5 mb-5">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                When DAC7 reporting becomes required, Camelune uses
-                information already saved in your seller account. You can
-                review and update it below.
-              </p>
-            </div>
-            <ul className="text-sm text-ink space-y-2">
-              <li>· Company details</li>
-              <li>· Commercial registration number</li>
-              <li>· Taxpayer ID</li>
-              <li>· VAT ID</li>
-              <li>· Payout account</li>
-              <li>· Transaction totals calculated by Camelune</li>
-            </ul>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      {/* Information used for DAC7 — always open per GDPR transparency */}
+      <section className="border border-line bg-background p-7 mb-3">
+        <div className="flex items-start justify-between gap-6 mb-5">
+          <div>
+            <p className="text-[15px] text-ink">Information used for DAC7</p>
+            <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-2xl">
+              When DAC7 reporting becomes required, Camelune uses
+              information already saved in your seller account.
+            </p>
+          </div>
+          {/* TODO: activate when Help Center is published */}
+          <HelpLink
+            inline
+            label="View how Camelune uses your data"
+            href="/help/dac7/data-privacy"
+          />
+        </div>
+        <ul className="text-sm text-ink space-y-2">
+          <li>· Company details</li>
+          <li>· Commercial registration number</li>
+          <li>· Taxpayer ID</li>
+          <li>· VAT ID</li>
+          <li>· Payout account</li>
+          <li>· Transaction totals calculated by Camelune</li>
+        </ul>
+        <p className="text-xs text-muted-foreground mt-5 leading-relaxed">
+          This information is only shared with tax authorities when the
+          reporting thresholds above are met. It is processed in accordance
+          with GDPR and Camelune's Privacy Policy.
+        </p>
+      </section>
+
+      {/* What happens when you are reported */}
+      <section className="border border-line bg-background p-7 mb-8">
+        <div className="flex items-start gap-4 mb-4">
+          <Send className="h-5 w-5 text-ink-soft mt-0.5 shrink-0" strokeWidth={1.5} />
+          <p className="text-[15px] text-ink">
+            What happens when you are reported
+          </p>
+        </div>
+        <ul className="text-sm text-muted-foreground space-y-3 leading-relaxed pl-9">
+          <li>
+            Camelune submits your seller information and transaction data to
+            the Romanian tax authority (ANAF) by 31 January each year, for
+            the previous calendar year.
+          </li>
+          <li>
+            You will receive an email notification when your report has been
+            submitted, with a reference number and a link to view the full
+            report in your account.
+          </li>
+          <li>
+            You do not need to take any action. The report is submitted by
+            Camelune on your behalf.
+          </li>
+          <li>
+            The tax authority may use this information to cross-check your
+            existing tax declarations. You should ensure your personal
+            income declarations are up to date.
+          </li>
+          <li>
+            If the tax authority has questions, they will contact you
+            directly — not through Camelune.
+          </li>
+        </ul>
+      </section>
 
       {/* Collapsible — Saved seller information */}
       <Accordion type="multiple" defaultValue={["saved"]} className="mb-10">
