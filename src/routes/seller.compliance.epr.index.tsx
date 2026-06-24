@@ -3,7 +3,14 @@ import { useState } from "react";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { StatusBadge } from "@/components/seller/StatusBadge";
 import { FAQ } from "@/components/seller/FAQ";
+import { HelpLink } from "@/components/seller/HelpLink";
 import { Progress } from "@/components/ui/progress";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   OBLIGATIONS,
   CATEGORY_LABEL,
@@ -68,27 +75,30 @@ function Page() {
         </p>
       </header>
 
-      {/* Educational */}
-      <section className="border border-line bg-cream/40 p-7 mb-8">
-        <div className="flex items-start gap-4">
-          <Info className="h-5 w-5 text-ink-soft mt-0.5 shrink-0" strokeWidth={1.5} />
-          <div className="flex-1">
-            <p className="text-[15px] text-ink">What is EPR?</p>
-            <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+      {/* Educational — collapsed by default (Global Rule) */}
+      <Accordion type="single" collapsible className="mb-8">
+        <AccordionItem value="what" className="border border-line bg-cream/40">
+          <AccordionTrigger className="px-7 py-5 hover:no-underline">
+            <div className="flex items-center gap-4 text-left">
+              <Info className="h-5 w-5 text-ink-soft shrink-0" strokeWidth={1.5} />
+              <span className="text-[15px] text-ink">What is EPR?</span>
+              <span className="text-xs text-muted-foreground ml-2">Learn more</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-7 pb-6 pl-[60px]">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               EPR obliges producers to ensure their products are designed,
               used and disposed of in an environmentally responsible way.
               Sellers who ship products to EU countries are considered
               producers and must comply.
             </p>
-            <a
-              href="#faq"
-              className="mt-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink"
-            >
-              Learn more <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} />
-            </a>
-          </div>
-        </div>
-      </section>
+            <div className="pt-3">
+              {/* TODO: activate when Help Center is published */}
+              <HelpLink inline label="Learn more" href="/help/epr" />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Stats row */}
       <section className="border border-line bg-background p-7 mb-2">
@@ -396,7 +406,7 @@ function Row({ k, v }: { k: string; v: string }) {
 }
 
 const EPR_FAQ = [
-  { q: "What is EPR?", a: "Extended Producer Responsibility (EPR) requires producers to take responsibility for the environmental impact of their products, including packaging, batteries, electronics and textiles." },
+  // "What is EPR?" moved to collapsible card at top (Global Rule: no duplicates)
   { q: "Why do I need to provide this information?", a: "Camelune may need to verify that your seller account is allowed to sell affected products in specific destination countries." },
   { q: "Which countries are affected?", a: "Requirements depend on the countries where your products are sold or shipped. Camelune shows obligations separately for each destination country." },
   { q: "What happens if I do not complete a requirement?", a: "Only the affected listings and destination countries are restricted. Missing German packaging information blocks eligible sales to Germany, but not necessarily sales to Romania or France." },
