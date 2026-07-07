@@ -66,8 +66,8 @@ export const OBLIGATIONS: Obligation[] = [
   { id: "textiles-RO", category: "textiles", country: "RO", status: "not-required", affectedProducts: 0, authority: "Reciclad'OR", note: "Reciclad'OR — voluntary scheme, not required in Romania at this time." },
 
   // Germany
-  { id: "packaging-DE", category: "packaging", country: "DE", status: "missing", dueLabel: "Blocks DE sales", affectedProducts: 31, authority: "ZSVR / LUCID", note: "LUCID registration is required before any packaged shipment enters Germany. Without it, 31 listings cannot ship to DE." },
-  { id: "batteries-DE", category: "batteries", country: "DE", status: "review-required", dueLabel: "Action required", affectedProducts: 9, authority: "Stiftung EAR (BattG-Melderegister)", note: "Quartz and smartwatch listings require battery registration with Stiftung EAR." },
+  { id: "packaging-DE", category: "packaging", country: "DE", status: "missing", dueLabel: "Blocks DE sales", affectedProducts: 31, authority: "ZSVR / LUCID" },
+  { id: "batteries-DE", category: "batteries", country: "DE", status: "review-required", dueLabel: "Action required", affectedProducts: 9, authority: "Stiftung EAR (BattG-Melderegister)", note: "Applies to quartz watch and smartwatch listings in your catalogue." },
   { id: "weee-DE", category: "weee", country: "DE", status: "submitted", dueLabel: "Filed 02 Jun 2026", affectedProducts: 4, authority: "Stiftung EAR", note: "Awaiting WEEE number assignment." },
   { id: "textiles-DE", category: "textiles", country: "DE", status: "expiring-soon", dueLabel: "Renew by 14 Aug 2026", affectedProducts: 18, authority: "ZSVR (voluntary register)", note: "Apparel & bag declarations expire in 8 weeks." },
 
@@ -131,14 +131,60 @@ export function statusToneClass(s: EprStatus) {
   return statusGroupToneClass(statusGroup(s));
 }
 
-/** Slug used in detail routes: `${category}-${country}` (lowercase country). */
+/** Legacy internal key: `packaging-de` */
 export function obligationSlug(o: { category: EprCategory; country: CountryCode }) {
   return `${o.category}-${o.country.toLowerCase()}`;
 }
 
+const COUNTRY_ROUTE_SLUG: Record<CountryCode, string> = {
+  RO: "romania",
+  DE: "germany",
+  FR: "france",
+};
+
+const ROUTE_SLUG_TO_CODE: Record<string, CountryCode> = {
+  romania: "RO",
+  germany: "DE",
+  france: "FR",
+};
+
+/** Public URL segment: `packaging-germany`, `batteries-romania`, etc. */
+export function obligationRouteSlug(o: { category: EprCategory; country: CountryCode }) {
+  return `${o.category}-${COUNTRY_ROUTE_SLUG[o.country]}`;
+}
+
+export function parseObligationRouteSlug(slug: string): string {
+  const lower = slug.toLowerCase();
+  for (const [name, code] of Object.entries(ROUTE_SLUG_TO_CODE)) {
+    const suffix = `-${name}`;
+    if (lower.endsWith(suffix)) {
+      const category = lower.slice(0, -suffix.length);
+      return `${category}-${code.toLowerCase()}`;
+    }
+  }
+  return lower;
+}
+
+export type ObligationDetailDestination = {
+  to: "/seller/compliance/epr/$slug";
+  params: { slug: string };
+};
+
+/** Canonical detail route for an obligation (matrix, Fix now, country rows). */
+export function obligationDetailLink(o: {
+  category: EprCategory;
+  country: CountryCode;
+}): ObligationDetailDestination {
+  return {
+    to: "/seller/compliance/epr/$slug",
+    params: { slug: obligationRouteSlug(o) },
+  };
+}
+
 export function findObligationBySlug(slug: string): Obligation | undefined {
+  const key = parseObligationRouteSlug(slug);
   return OBLIGATIONS.find(
-    (o) => `${o.category}-${o.country.toLowerCase()}` === slug.toLowerCase(),
+    (o) => `${o.category}-${o.country.toLowerCase()}` === key,
   );
 }
 
@@ -153,6 +199,7 @@ export interface DetailField {
   optional?: boolean;
   note?: string;
   defaultValue?: string;
+  formatKey?: "lucid";
 }
 
 export interface DetailSpec {
@@ -189,7 +236,7 @@ export const DETAIL_SPECS: Record<string, DetailSpec> = {
       { title: "Authorized representative", desc: "Optional today. Will be mandatory from August 2026 under PPWR for sellers not established in Germany." },
     ],
     fields: [
-      { key: "epr", label: "LUCID registration number", type: "text", note: "Format: DE + 11 digits." },
+      { key: "epr", label: "LUCID registration number", type: "text", note: "Format: DE + 11 digits.", formatKey: "lucid" },
       { key: "doc", label: "Upload packaging licence proof", type: "file" },
       { key: "rep", label: "Authorized representative name", type: "text", optional: true, note: "Optional today, mandatory from August 2026." },
       { key: "repDoc", label: "Upload proof of authorization", type: "file", optional: true },

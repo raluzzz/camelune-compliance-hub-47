@@ -4,6 +4,7 @@ import {
   OBLIGATIONS,
   CATEGORY_LABEL,
   COUNTRY_LABEL,
+  obligationDetailLink,
   statusGroup,
   type CountryCode,
 } from "@/lib/epr-data";
@@ -61,6 +62,9 @@ function Page() {
               overall === "Under review" ? "text-slate-600" :
               "text-emerald-700";
 
+            const primary = needs[0] ?? rows[0];
+            const dest = primary ? obligationDetailLink(primary) : null;
+
             return (
               <section key={country.code} className="border border-line bg-background p-7">
                 <div className="flex items-start justify-between gap-8">
@@ -96,15 +100,18 @@ function Page() {
                     )}
                   </div>
 
-                  <Link
-                    to="/seller/compliance/epr/packaging-germany"
-                    className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink whitespace-nowrap"
-                  >
-                    {needs.length > 0
-                      ? `Resolve ${COUNTRY_LABEL[country.code]} requirements`
-                      : "View details"}
-                    <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} />
-                  </Link>
+                  {dest ? (
+                    <Link
+                      to={dest.to}
+                      params={dest.params}
+                      className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink whitespace-nowrap"
+                    >
+                      {needs.length > 0
+                        ? `Resolve ${COUNTRY_LABEL[country.code]} requirements`
+                        : "View details"}
+                      <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    </Link>
+                  ) : null}
                 </div>
               </section>
             );

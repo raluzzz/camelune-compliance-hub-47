@@ -1,6 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
-import { CheckCircle2, ArrowLeft, Download } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertTriangle,
+  ArrowLeft,
+  Download,
+  Clock,
+} from "lucide-react";
+import { DAC7_REPORT_HISTORY, DAC7_SELLER, getDac7ReportRecord, type ReportHistoryStatus } from "@/lib/dac7-data";
+import { downloadDac7ReportPdf } from "@/lib/dac7-pdf";
+import { hasSubmissionHistory, reportBannerCopy } from "@/lib/dac7-report-display";
 
 export const Route = createFileRoute("/seller/compliance/dac7/report/$year")({
   head: ({ params }) => ({
@@ -8,6 +17,16 @@ export const Route = createFileRoute("/seller/compliance/dac7/report/$year")({
       { title: `DAC7 report — ${params.year} — Camelune` },
     ],
   }),
+  loader: ({ params }) => {
+    const report = getDac7ReportRecord(params.year);
+    if (!report || report.action !== "View report") throw notFound();
+    return { report };
+  },
+  notFoundComponent: () => (
+    <ModuleLayout backLabel="Back to DAC7" backTo="/seller/compliance/dac7">
+      <p className="text-sm text-muted-foreground">Report not found.</p>
+    </ModuleLayout>
+  ),
   component: Page,
 });
 
@@ -18,8 +37,25 @@ const QUARTERS: { q: string; sales: number; fees: number; taxes: number; revenue
   { q: "Q4", sales: 24, fees: 480, taxes: 960, revenue: 9600 },
 ];
 
+function statusIcon(status: ReportHistoryStatus) {
+  if (status === "Correction pending") {
+    return <Clock className="h-5 w-5 text-amber-700 mt-0.5" strokeWidth={1.5} />;
+  }
+  if (status === "Correction rejected") {
+    return <AlertTriangle className="h-5 w-5 text-rose-700 mt-0.5" strokeWidth={1.5} />;
+  }
+  return <CheckCircle2 className="h-5 w-5 text-emerald-700 mt-0.5" strokeWidth={1.5} />;
+}
+
 function Page() {
   const { year } = Route.useParams();
+  const { report } = Route.useLoaderData();
+  const status: ReportHistoryStatus = report.status;
+  const reference = report.reference;
+  const submitted = report.submitted;
+  const banner = reportBannerCopy(report);
+  const showSubmissionHistory = hasSubmissionHistory(report);
+
   const total = QUARTERS.reduce(
     (a, r) => ({
       sales: a.sales + r.sales,
@@ -48,20 +84,18 @@ function Page() {
         </p>
       </header>
 
-      {/* Status card */}
       <section className="border border-line bg-background p-7 mb-10">
         <div className="flex items-start gap-3">
-          <CheckCircle2 className="h-5 w-5 text-emerald-700 mt-0.5" strokeWidth={1.5} />
+          {statusIcon(status)}
           <div>
-            <p className="text-[18px] text-ink">Reported</p>
+            <p className="text-[18px] text-ink">{banner.title}</p>
             <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-              Submitted on 31 Jan 2025 · Reference DAC7-{year}-00027
+              {banner.body}
             </p>
           </div>
         </div>
       </section>
 
-      {/* Sales & revenue table */}
       <section className="mb-10">
         <h2 className="text-base text-ink mb-5">Sales and revenue</h2>
         <div className="border border-line bg-background">
@@ -94,22 +128,64 @@ function Page() {
         </div>
       </section>
 
-      {/* Seller information reported */}
       <section className="mb-10">
         <h2 className="text-base text-ink mb-5">Seller information reported</h2>
         <div className="border border-line bg-background p-6">
           <dl className="text-sm divide-y divide-line">
-            <Row k="Company name" v="Atelier Lune SRL" />
-            <Row k="Country" v="Romania" />
-            <Row k="VAT number" v="RO 42183901" />
-            <Row k="Commercial registration" v="J40/2185/2022" />
-            <Row k="Taxpayer ID" v="42183901" />
+            <Row k="Company name" v={DAC7_SELLER.companyName} />
+            <Row k="Country" v={DAC7_SELLER.companyCountry} />
+            <Row k="VAT number" v={DAC7_SELLER.vatNumber} />
+            <Row k="Commercial registration" v={DAC7_SELLER.registrationNumber} />
+            <Row k="Taxpayer ID" v={DAC7_SELLER.taxpayerId} />
           </dl>
         </div>
       </section>
 
+      {showSubmissionHistory && report.submissionHistory && (
+        <section className="mb-10">
+          <h2 className="text-base text-ink mb-5">Submission history</h2>
+          <div className="border border-line bg-background">
+            <div className="hidden md:grid grid-cols-[180px_1fr_1fr] px-6 py-3 border-b border-line text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+              <div>Type</div>
+              <div>Submitted</div>
+              <div>Reference</div>
+            </div>
+            {report.submissionHistory.map((entry) => (
+              <div
+                key={`${entry.kind}-${entry.reference}`}
+                className="grid grid-cols-1 md:grid-cols-[180px_1fr_1fr] px-6 py-4 border-b border-line last:border-b-0 text-sm"
+              >
+                <div className="text-ink">{entry.kind}</div>
+                <div className="mt-1 md:mt-0 text-muted-foreground">Submitted {entry.date}</div>
+                <div className="mt-1 md:mt-0 text-muted-foreground">Reference {entry.reference}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <div className="border-t border-line pt-6">
-        <button className="inline-flex items-center gap-2 px-5 h-11 bg-ink text-cream text-xs uppercase tracking-[0.16em] hover:bg-ink/90">
+        <button
+          type="button"
+          onClick={() =>
+            downloadDac7ReportPdf(`DAC7-report-${year}.pdf`, [
+              `DAC7 Report — ${year}`,
+              `Company: ${DAC7_SELLER.companyName}`,
+              `Country: ${DAC7_SELLER.companyCountry}`,
+              `VAT: ${DAC7_SELLER.vatNumber}`,
+              `Registration: ${DAC7_SELLER.registrationNumber}`,
+              `Taxpayer ID: ${DAC7_SELLER.taxpayerId}`,
+              `Status: ${status}`,
+              `Submitted: ${submitted}`,
+              `Reference: ${reference}`,
+              `Total sales: ${total.sales}`,
+              `Total revenue: EUR ${total.revenue.toLocaleString()}`,
+              `Total fees: EUR ${total.fees.toLocaleString()}`,
+              `Total taxes: EUR ${total.taxes.toLocaleString()}`,
+            ])
+          }
+          className="inline-flex items-center gap-2 px-5 h-11 bg-ink text-cream text-xs uppercase tracking-[0.16em] hover:bg-ink/90"
+        >
           <Download className="h-4 w-4" strokeWidth={1.5} />
           Download report (PDF)
         </button>

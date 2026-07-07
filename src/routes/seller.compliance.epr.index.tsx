@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
-import { StatusBadge } from "@/components/seller/StatusBadge";
 import { FAQ } from "@/components/seller/FAQ";
 import { HelpLink } from "@/components/seller/HelpLink";
-import { Progress } from "@/components/ui/progress";
+import { EPR_FAQ } from "@/lib/epr-help-data";
+import { EprPartnerNotice } from "@/components/seller/EprPartnerNotice";
 import {
   Accordion,
   AccordionContent,
@@ -15,13 +15,24 @@ import {
   OBLIGATIONS,
   CATEGORY_LABEL,
   COUNTRY_LABEL,
-  obligationSlug,
+  STATUS_LABEL,
+  SELLER,
+  obligationDetailLink,
   statusGroup,
   type EprCategory,
   type CountryCode,
+  type EprStatus,
   type Obligation,
 } from "@/lib/epr-data";
-import { ArrowRight, Info, ChevronRight } from "lucide-react";
+import {
+  computeEprCounters,
+  obligationsForCounter,
+  counterPanelTitle,
+  counterPanelAction,
+  shouldShowInEprTabs,
+  type EprCounterKey,
+} from "@/lib/epr-stats";
+import { ArrowRight, ChevronDown, Info } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -36,46 +47,128 @@ export const Route = createFileRoute("/seller/compliance/epr/")({
       {
         name: "description",
         content:
-          "Extended Producer Responsibility for packaging, batteries, electrical products and textiles in EU destination countries.",
+          "Extended Producer Responsibility for packaging, batteries and electrical products in EU destination countries.",
       },
     ],
   }),
   component: Page,
 });
 
-const CATEGORIES: EprCategory[] = ["packaging", "batteries", "weee", "textiles"];
-const COUNTRIES: CountryCode[] = ["RO", "DE", "FR"];
+const CATEGORY_TABS: { id: EprCategory; label: string }[] = [
+  { id: "packaging", label: "Packaging" },
+  { id: "batteries", label: "Batteries" },
+  { id: "weee", label: "Electrical appliances" },
+];
 
-type Tab = "all" | "action" | "documents";
+const COUNTRY_ORDER: CountryCode[] = ["RO", "DE", "FR"];
+
+const REQUIREMENT_TEXT: Record<EprCategory, Record<CountryCode, string>> = {
+  packaging: {
+    RO: "EPR number (PACK)",
+    DE: "EPR number (PACK) + Packaging licensing",
+    FR: "EPR number (PACK)",
+  },
+  batteries: {
+    RO: "EPR number (BATT)",
+    DE: "EPR number (BATT) + Authorized representative + Self-certification",
+    FR: "EPR number (BATT) + Authorized representative + Self-certification",
+  },
+  weee: {
+    RO: "EPR number (EEE)",
+    DE: "EPR number (EEE) + Authorized representative",
+    FR: "EPR number (EEE) + Authorized representative",
+  },
+  textiles: {
+    RO: "",
+    DE: "",
+    FR: "",
+  },
+};
+
+const EU_COUNTRY_CODES = new Set<CountryCode>(["RO", "DE", "FR"]);
+
+const CATEGORY_DESCRIPTION: Record<
+  EprCategory,
+  { title: string; body: string; helpPath: string } | null
+> = {
+  packaging: {
+    title: "Packaging (PACK)",
+    body: "Sellers who ship packaged goods to EU countries are required to register with the national packaging authority in each destination market and report the volumes placed on that market.",
+    helpPath: "/help/epr/packaging",
+  },
+  batteries: {
+    title: "Batteries (BATT)",
+    body: "Products that contain batteries — including quartz watches, smartwatches and accessories with integrated cells — require registration with the relevant battery authority in each EU country where they are sold.",
+    helpPath: "/help/epr/batteries",
+  },
+  weee: {
+    title: "Electrical appliances (EEE)",
+    body: "Electrical and electronic equipment sold into EU destination countries must be registered under the WEEE directive in each applicable market, regardless of where the seller is established.",
+    helpPath: "/help/epr/weee",
+  },
+  textiles: null,
+};
+
+type CounterKey = EprCounterKey;
+
+function EprHeaderDescription() {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="mt-3 max-w-2xl">
+      <p className="text-[15px] leading-relaxed text-muted-foreground">
+        Extended Producer Responsibility (EPR) requires producers to take
+        responsibility for the environmental impact of their products across
+        their entire lifecycle — from design to disposal.{" "}
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="inline-flex items-center text-muted-foreground hover:text-ink transition-colors"
+          aria-expanded={expanded}
+        >
+          <ChevronDown
+            className={`h-4 w-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            strokeWidth={1.5}
+          />
+        </button>
+      </p>
+
+      {expanded && (
+        <div className="mt-3">
+          <p className="text-[15px] leading-relaxed text-muted-foreground">
+            On Camelune, sellers who ship products to EU countries are
+            considered producers under local law, and may be required to
+            register and report for packaging, batteries and electrical
+            products in each destination country where their listings are sold.
+          </p>
+          <a
+            href="/help/epr"
+            className="inline-block mt-3 text-[13px] text-muted-foreground hover:text-ink underline-offset-4 hover:underline"
+          >
+            Learn more →
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Page() {
-  const total = OBLIGATIONS.length;
-  const needs = OBLIGATIONS.filter((o) => statusGroup(o.status) === "needs-action").length;
-  const approved = OBLIGATIONS.filter((o) => statusGroup(o.status) === "approved").length;
-  const underReview = OBLIGATIONS.filter((o) => statusGroup(o.status) === "under-review").length;
-  const completedPct = Math.round((approved / total) * 100);
+  const [categoryTab, setCategoryTab] = useState<EprCategory>("packaging");
+  const [counterPanel, setCounterPanel] = useState<CounterKey | null>(null);
 
-  const initialTab: Tab = needs > 0 ? "all" : "all";
-  const [tab, setTab] = useState<Tab>(initialTab);
+  const counters = computeEprCounters();
+  const { identified, "needs-action": needsAction, rejected, submitted } = counters;
 
-  const TABS: { id: Tab; label: string; count?: number }[] = [
-    { id: "all", label: "All obligations" },
-    ...(needs > 0 ? [{ id: "action" as Tab, label: "Needs action", count: needs }] : []),
-    { id: "documents", label: "Documents" },
-  ];
+  const isNonEuSeller = !EU_COUNTRY_CODES.has(SELLER.baseCountry);
 
   return (
     <ModuleLayout>
       <header className="mb-10">
         <h1 className="text-[2rem] text-ink">EPR Compliance</h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground max-w-2xl">
-          Extended Producer Responsibility (EPR) requires sellers to register
-          and report for packaging, batteries and electrical products sold in
-          EU countries.
-        </p>
+        <EprHeaderDescription />
       </header>
 
-      {/* Educational — collapsed by default (Global Rule) */}
       <Accordion type="single" collapsible className="mb-8">
         <AccordionItem value="what" className="border border-line bg-cream/40">
           <AccordionTrigger className="px-7 py-5 hover:no-underline">
@@ -87,330 +180,292 @@ function Page() {
           </AccordionTrigger>
           <AccordionContent className="px-7 pb-6 pl-[60px]">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              EPR obliges producers to ensure their products are designed,
-              used and disposed of in an environmentally responsible way.
-              Sellers who ship products to EU countries are considered
-              producers and must comply.
+              EPR obliges producers to ensure their products are designed, used
+              and disposed of in an environmentally responsible way. Sellers who
+              ship products to EU countries are considered producers and must
+              comply.
             </p>
             <div className="pt-3">
-              {/* TODO: activate when Help Center is published */}
               <HelpLink inline label="Learn more" href="/help/epr" />
             </div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
 
-      {/* Stats row */}
-      <section className="border border-line bg-background p-7 mb-2">
-        <div className="grid grid-cols-4 gap-6">
-          <Stat n={total} label="Total obligations" />
-          <Stat n={needs} label="Needs action" tone={needs > 0 ? "warn" : "neutral"} />
-          <Stat n={approved} label="Approved" tone="ok" />
-          <Stat n={underReview} label="Under review" tone="soft" />
-        </div>
-      </section>
-      <section className="border border-line border-t-0 bg-background p-7 mb-10">
-        <div className="flex items-baseline justify-between mb-2">
-          <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-            Overall progress
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {approved} of {total} completed — {completedPct}%
-          </p>
-        </div>
-        <Progress value={completedPct} className="h-1.5" />
-      </section>
+      <EprPartnerNotice />
 
-      {/* Tabs */}
-      <div className="border-b border-line mb-10">
+      {isNonEuSeller && (
+        <section className="border border-line bg-background p-6 mb-8">
+          <p className="text-[15px] text-ink">You are registered outside the EU</p>
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-2xl">
+            Sellers registered outside the EU may be required to appoint an
+            authorised representative in certain EU countries (e.g. Germany
+            under VerpackG, France for packaging from August 2026). The
+            relevant detail pages will indicate when this is mandatory.
+          </p>
+        </section>
+      )}
+
+      <ObligationsCounterCard
+        identified={identified}
+        needsAction={needsAction}
+        rejected={rejected}
+        submitted={submitted}
+        onOpen={setCounterPanel}
+      />
+
+      <div className="border-b border-line mb-0">
         <div className="flex gap-8 overflow-x-auto">
-          {TABS.map((t) => (
+          {CATEGORY_TABS.map((t) => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id)}
+              type="button"
+              onClick={() => setCategoryTab(t.id)}
               className={`pb-3 -mb-px text-[13px] transition-colors border-b-2 whitespace-nowrap ${
-                tab === t.id
+                categoryTab === t.id
                   ? "border-ink text-ink"
                   : "border-transparent text-muted-foreground hover:text-ink"
               }`}
             >
               {t.label}
-              {typeof t.count === "number" && (
-                <span className="ml-2 text-rose-700">({t.count})</span>
-              )}
             </button>
           ))}
         </div>
       </div>
 
-      {tab === "all" && <AllMatrix />}
-      {tab === "action" && <ActionRequired />}
-      {tab === "documents" && <SubmittedDocs />}
+      <CategoryTabContent category={categoryTab} />
 
-      <div id="faq">
-        <FAQ items={EPR_FAQ} />
-      </div>
+      <FAQ items={EPR_FAQ} />
+
+      <CounterPanel
+        panel={counterPanel}
+        onClose={() => setCounterPanel(null)}
+      />
     </ModuleLayout>
   );
 }
 
-function Stat({
-  n,
-  label,
-  tone = "neutral",
+function ObligationsCounterCard({
+  identified,
+  needsAction,
+  rejected,
+  submitted,
+  onOpen,
 }: {
-  n: number;
-  label: string;
-  tone?: "neutral" | "warn" | "soft" | "ok";
+  identified: number;
+  needsAction: number;
+  rejected: number;
+  submitted: number;
+  onOpen: (key: CounterKey) => void;
 }) {
-  const tc =
-    tone === "warn"
-      ? "text-rose-700"
-      : tone === "ok"
-        ? "text-emerald-700"
-        : tone === "soft"
-          ? "text-slate-600"
-          : "text-ink";
-  return (
-    <div>
-      <p className={`text-[28px] font-light ${tc}`}>{n}</p>
-      <p className="text-xs text-muted-foreground mt-1">{label}</p>
-    </div>
-  );
-}
-
-function AllMatrix() {
-  return (
-    <div className="border border-line bg-background overflow-x-auto">
-      <div className="grid grid-cols-[200px_repeat(3,1fr)] border-b border-line text-[11px] uppercase tracking-[0.14em] text-muted-foreground min-w-[720px]">
-        <div className="px-5 py-3">Category</div>
-        {COUNTRIES.map((c) => (
-          <div key={c} className="px-5 py-3 border-l border-line">
-            {COUNTRY_LABEL[c]}
-          </div>
-        ))}
-      </div>
-      {CATEGORIES.map((cat) => (
-        <div
-          key={cat}
-          className="grid grid-cols-[200px_repeat(3,1fr)] border-b border-line last:border-b-0 min-w-[720px]"
-        >
-          <div className="px-5 py-5 text-sm text-ink">{CATEGORY_LABEL[cat]}</div>
-          {COUNTRIES.map((country) => {
-            const o = OBLIGATIONS.find((x) => x.category === cat && x.country === country);
-            if (!o) return <div key={country} className="px-5 py-5 border-l border-line" />;
-            const interactive =
-              statusGroup(o.status) === "needs-action" ||
-              statusGroup(o.status) === "expiring-soon";
-            const cell = (
-              <>
-                <StatusBadge status={o.status} />
-                <p className="text-xs text-muted-foreground mt-2">
-                  {o.affectedProducts > 0 ? `${o.affectedProducts} listings` : o.authority}
-                </p>
-                {o.dueLabel && (
-                  <p className="text-xs text-ink-soft mt-1">{o.dueLabel}</p>
-                )}
-              </>
-            );
-            return interactive ? (
-              <Link
-                key={country}
-                to="/seller/compliance/epr/r/$slug"
-                params={{ slug: obligationSlug(o) }}
-                className="px-5 py-5 border-l border-line block hover:bg-muted/40 transition-colors"
-              >
-                {cell}
-              </Link>
-            ) : (
-              <Link
-                key={country}
-                to="/seller/compliance/epr/r/$slug"
-                params={{ slug: obligationSlug(o) }}
-                className="px-5 py-5 border-l border-line block hover:bg-muted/40 transition-colors"
-              >
-                {cell}
-              </Link>
-            );
-          })}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ActionRequired() {
-  const items = OBLIGATIONS.filter((o) => statusGroup(o.status) === "needs-action");
-  if (items.length === 0) {
-    return (
-      <div className="text-center py-20 text-muted-foreground text-sm">
-        Nothing requires your attention right now.
-      </div>
-    );
-  }
-  return (
-    <div className="space-y-4">
-      {items.map((o) => (
-        <div
-          key={o.id}
-          className="border border-line bg-background px-7 py-6"
-        >
-          <div className="flex items-start justify-between gap-8">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-3">
-                <p className="text-[15px] text-ink">
-                  {CATEGORY_LABEL[o.category]} — {COUNTRY_LABEL[o.country]}
-                </p>
-                <StatusBadge status={o.status} />
-              </div>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-xl">
-                {o.note}
-              </p>
-              {o.affectedProducts > 0 && (
-                <a
-                  href="#"
-                  className="inline-block text-xs text-rose-700 mt-2 underline-offset-4 hover:underline"
-                >
-                  {o.affectedProducts} listings affected — view listings
-                </a>
-              )}
-            </div>
-            <Link
-              to="/seller/compliance/epr/r/$slug"
-              params={{ slug: obligationSlug(o) }}
-              className="inline-flex items-center gap-2 px-5 h-11 bg-ink text-cream text-xs uppercase tracking-[0.16em] hover:bg-ink/90 whitespace-nowrap"
-            >
-              Fix now <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} />
-            </Link>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-type DocState = "approved" | "under-review" | "rejected" | "expiring-soon" | "expired";
-
-function docState(o: Obligation): DocState | null {
-  switch (o.status) {
-    case "approved": return "approved";
-    case "submitted":
-    case "under-review":
-    case "draft": return "under-review";
-    case "rejected":
-    case "review-required": return "rejected";
-    case "expiring-soon": return "expiring-soon";
-    default: return null;
-  }
-}
-
-function docFileName(o: Obligation) {
-  return `${o.category}-${o.country.toLowerCase()}-2026.pdf`;
-}
-
-function SubmittedDocs() {
-  const [selected, setSelected] = useState<Obligation | null>(null);
-  const docs = OBLIGATIONS.filter((o) => docState(o) !== null);
+  const cols: { key: CounterKey; label: string; value: number }[] = [
+    { key: "identified", label: "Identified", value: identified },
+    { key: "needs-action", label: "Needs action", value: needsAction },
+    { key: "rejected", label: "Rejected", value: rejected },
+    { key: "submitted", label: "Submitted", value: submitted },
+  ];
 
   return (
-    <>
-      <div className="border border-line divide-y divide-line bg-background">
-        {docs.map((o) => (
+    <section className="border border-line bg-background mb-10">
+      <div className="grid grid-cols-4 divide-x divide-line">
+        {cols.map((col) => (
           <button
-            key={o.id}
-            onClick={() => setSelected(o)}
-            className="w-full text-left px-6 py-5 flex items-center justify-between gap-6 hover:bg-muted/40 transition-colors group"
+            key={col.key}
+            type="button"
+            onClick={() => onOpen(col.key)}
+            className="px-6 py-7 text-left hover:bg-muted/40 transition-colors duration-150"
           >
-            <div className="min-w-0 flex-1">
-              <p className="text-sm text-ink">
-                {CATEGORY_LABEL[o.category]} — {COUNTRY_LABEL[o.country]}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {o.authority} · {docFileName(o)}
-              </p>
-              {o.dueLabel && (
-                <p className="text-xs text-ink-soft mt-1">{o.dueLabel}</p>
-              )}
-            </div>
-            <div className="flex items-center gap-5 shrink-0">
-              <StatusBadge status={o.status} />
-              <ChevronRight
-                className="h-4 w-4 text-muted-foreground group-hover:text-ink transition-colors"
-                strokeWidth={1.5}
-              />
+            <div className="flex flex-col gap-1">
+              <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                {col.label}
+              </span>
+              <span className="text-[28px] font-light text-ink leading-none mt-2">
+                {col.value}
+              </span>
             </div>
           </button>
         ))}
       </div>
-
-      <Sheet open={!!selected} onOpenChange={(v) => !v && setSelected(null)}>
-        <SheetContent className="w-full sm:max-w-[480px] bg-background border-l border-line p-0 overflow-y-auto">
-          {selected && <DocumentPanel obligation={selected} />}
-        </SheetContent>
-      </Sheet>
-    </>
+    </section>
   );
 }
 
-function DocumentPanel({ obligation: o }: { obligation: Obligation }) {
+function CategoryTabContent({ category }: { category: EprCategory }) {
+  const rows = OBLIGATIONS.filter(
+    (o) => o.category === category && shouldShowInEprTabs(o),
+  ).sort(
+    (a, b) => COUNTRY_ORDER.indexOf(a.country) - COUNTRY_ORDER.indexOf(b.country),
+  );
+
   return (
-    <div className="px-8 py-10">
-      <SheetHeader className="text-left space-y-3 mb-8">
-        <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-          {COUNTRY_LABEL[o.country]}
-        </p>
-        <SheetTitle className="text-[22px] font-normal text-ink">
-          {CATEGORY_LABEL[o.category]}
-        </SheetTitle>
-        <div>
-          <StatusBadge status={o.status} />
-        </div>
-      </SheetHeader>
-
-      <dl className="text-sm divide-y divide-line border-t border-b border-line">
-        <Row k="Authority" v={o.authority} />
-        <Row k="Document" v={docFileName(o)} />
-        {o.dueLabel && <Row k="Renews / due" v={o.dueLabel} />}
-        {o.affectedProducts > 0 && (
-          <Row k="Affected listings" v={`${o.affectedProducts}`} />
+    <div className="mb-12 mt-8">
+      {(() => {
+        const desc = CATEGORY_DESCRIPTION[category];
+        if (!desc) return null;
+        return (
+          <div className="mb-6">
+            <p className="text-[15px] text-ink mb-2">{desc.title}</p>
+            <p className="text-[13px] leading-relaxed text-muted-foreground max-w-2xl">
+              {desc.body}
+            </p>
+            <a
+              href={desc.helpPath}
+              className="inline-block mt-3 text-[13px] text-muted-foreground hover:text-ink underline-offset-4 hover:underline"
+            >
+              Learn more →
+            </a>
+          </div>
+        );
+      })()}
+      <div className="border border-line bg-background divide-y divide-line">
+        {rows.length === 0 ? (
+          <p className="px-6 py-8 text-sm text-muted-foreground">
+            No obligations in your current listings.
+          </p>
+        ) : (
+          rows.map((o) => (
+            <CountryObligationRow key={o.id} obligation={o} category={category} />
+          ))
         )}
-      </dl>
-
-      {o.note && (
-        <p className="text-sm text-muted-foreground leading-relaxed mt-6">
-          {o.note}
-        </p>
-      )}
-
-      <div className="mt-8">
-        <Link
-          to="/seller/compliance/epr/r/$slug"
-          params={{ slug: obligationSlug(o) }}
-          className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70"
-        >
-          Open requirement details
-          <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} />
-        </Link>
       </div>
     </div>
   );
 }
 
-function Row({ k, v }: { k: string; v: string }) {
+function CountryObligationRow({
+  obligation: o,
+  category,
+}: {
+  obligation: Obligation;
+  category: EprCategory;
+}) {
+  const group = statusGroup(o.status);
+  const dest = obligationDetailLink(o);
+  const requirement = REQUIREMENT_TEXT[category][o.country];
+
+  const subText =
+    group === "neutral"
+      ? `${o.authority} — not required for this category in ${COUNTRY_LABEL[o.country]} at this time.`
+      : o.dueLabel;
+
+  const rowInner = (
+    <>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm text-ink">{COUNTRY_LABEL[o.country]}</p>
+        <p className="text-xs text-muted-foreground mt-1">{requirement}</p>
+        {subText && (
+          <p className="text-xs text-muted-foreground mt-1">{subText}</p>
+        )}
+      </div>
+      <div className="flex items-center gap-4 shrink-0">
+        <EprStatusLabel status={o.status} />
+        {group === "expiring-soon" && (
+          <span className="text-xs uppercase tracking-[0.16em] text-ink inline-flex items-center gap-1">
+            Renew <ArrowRight className="h-3 w-3" strokeWidth={1.5} />
+          </span>
+        )}
+      </div>
+    </>
+  );
+
+  const rowClassName =
+    "flex items-center justify-between gap-6 px-6 py-4 hover:bg-muted/40 transition-colors duration-150 cursor-pointer";
+
   return (
-    <div className="grid grid-cols-[140px_1fr] py-3">
-      <dt className="text-muted-foreground">{k}</dt>
-      <dd className="text-ink">{v}</dd>
-    </div>
+    <Link
+      to={dest.to}
+      params={dest.params}
+      className={rowClassName}
+    >
+      {rowInner}
+    </Link>
   );
 }
 
-const EPR_FAQ = [
-  // "What is EPR?" moved to collapsible card at top (Global Rule: no duplicates)
-  { q: "Why do I need to provide this information?", a: "Camelune may need to verify that your seller account is allowed to sell affected products in specific destination countries." },
-  { q: "Which countries are affected?", a: "Requirements depend on the countries where your products are sold or shipped. Camelune shows obligations separately for each destination country." },
-  { q: "What happens if I do not complete a requirement?", a: "Only the affected listings and destination countries are restricted. Missing German packaging information blocks eligible sales to Germany, but not necessarily sales to Romania or France." },
-  { q: "Why are only some listings blocked?", a: "EPR obligations depend on product type, destination country and shipping model. A smartwatch may require packaging, battery and WEEE information, while a mechanical watch may only require packaging." },
-  { q: "Do I need separate registrations for packaging, batteries and WEEE?", a: "In most countries, yes. Packaging, batteries and electrical/electronic products usually have separate registration and reporting systems." },
-  { q: "What happens after I submit my documents?", a: "Camelune reviews the information and updates the requirement status. If something is missing or unclear, you will be asked to correct it." },
-];
+function CounterPanel({
+  panel,
+  onClose,
+}: {
+  panel: CounterKey | null;
+  onClose: () => void;
+}) {
+  const items = panel ? obligationsForCounter(panel) : [];
+
+  return (
+    <Sheet open={!!panel} onOpenChange={(v) => !v && onClose()}>
+      <SheetContent className="w-full sm:max-w-[480px] bg-background border-l border-line p-0 overflow-y-auto">
+        {panel && (
+          <div className="px-8 py-10">
+            <SheetHeader className="text-left mb-8">
+              <SheetTitle className="text-[22px] font-normal text-ink">
+                {counterPanelTitle(panel)}
+              </SheetTitle>
+            </SheetHeader>
+            <div className="space-y-4">
+              {items.map((o) => {
+                const action = counterPanelAction(o.status);
+                return (
+                  <div key={o.id} className="border border-line p-5">
+                    <div className="flex items-center justify-between gap-4 mb-2">
+                      <p className="text-sm text-ink">
+                        {CATEGORY_LABEL[o.category]} — {COUNTRY_LABEL[o.country]}
+                      </p>
+                      <EprStatusLabel status={o.status} />
+                    </div>
+                    {o.note && (
+                      <p className="text-xs text-muted-foreground leading-relaxed">{o.note}</p>
+                    )}
+                    <ObligationDetailLink
+                      obligation={o}
+                      onClick={onClose}
+                      className="mt-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70"
+                    >
+                      {action}
+                      <ArrowRight className="h-3.5 w-3.5" strokeWidth={1.5} />
+                    </ObligationDetailLink>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function ObligationDetailLink({
+  obligation: o,
+  children,
+  className,
+  onClick,
+}: {
+  obligation: Obligation;
+  children: ReactNode;
+  className?: string;
+  onClick?: () => void;
+}) {
+  const dest = obligationDetailLink(o);
+  return (
+    <Link to={dest.to} params={dest.params} className={className} onClick={onClick}>
+      {children}
+    </Link>
+  );
+}
+
+function statusTextColor(status: EprStatus): string {
+  if (["missing", "rejected", "review-required"].includes(status)) return "text-rose-700";
+  if (status === "approved") return "text-emerald-700";
+  if (["under-review", "submitted", "draft"].includes(status)) return "text-slate-500";
+  if (status === "expiring-soon") return "text-amber-700";
+  return "text-muted-foreground";
+}
+
+function EprStatusLabel({ status }: { status: EprStatus }) {
+  const color = statusTextColor(status);
+  return (
+    <span className={`text-[11px] uppercase tracking-[0.12em] font-medium ${color}`}>
+      {STATUS_LABEL[status]}
+    </span>
+  );
+}

@@ -1,15 +1,36 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState, type ReactNode } from "react";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { FAQ } from "@/components/seller/FAQ";
-import { EditModal } from "@/components/seller/EditModal";
 import { HelpLink } from "@/components/seller/HelpLink";
+import { TAX_FAQ } from "@/lib/tax-help-data";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  VAT_COUNTRIES,
+  formatVatDisplay,
+  vatFormatError,
+  verifyVatNumber,
+  type VatCountry,
+  type VatVerificationStatus,
+} from "@/lib/vat-validation";
+import {
+  effectiveFromError,
+  formatOssSummary,
+  OSS_MEMBER_STATES,
+  useOssRegistration,
+  type OssRegistration,
+  type OssScheme,
+} from "@/lib/oss-registration";
+import {
+  ComplianceDatePicker,
+  ComplianceSelect,
+  complianceFieldLabelClass,
+} from "@/components/seller/ComplianceFormControls";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +39,7 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Info, CheckCircle2, Plus } from "lucide-react";
+import { ChevronDown, CircleAlert, Info, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/seller/compliance/tax/")({
   head: () => ({
@@ -37,7 +58,7 @@ export const Route = createFileRoute("/seller/compliance/tax/")({
 interface VatRow {
   country: string;
   number: string;
-  status: "Verified" | "Pending" | "Invalid";
+  status: VatVerificationStatus;
 }
 
 const INITIAL_VAT: VatRow[] = [
@@ -46,20 +67,60 @@ const INITIAL_VAT: VatRow[] = [
   { country: "France", number: "FR 76 123456789", status: "Verified" },
 ];
 
+const THRESHOLD_ANSWER =
+  "Yes — my total cross-border sales exceed €10,000. I commit to providing valid VAT numbers for each EU country I ship to, or my OSS registration number.";
+
+const NON_EU_ANSWER =
+  'No — I do not ship goods worth over €150 "taxed and with duty paid" from a non-EU country to EU buyers.';
+
+const THRESHOLD_OPTIONS = [
+  "No — my total cross-border sales do not exceed the threshold in the previous or current calendar year, or I only sell goods under a margin scheme and do not ship from my country of establishment. I commit to providing the VAT number assigned to me by my home country.",
+  "Yes — my total cross-border sales exceed €10,000. I commit to providing valid VAT numbers for each EU country I ship to, or my OSS registration number.",
+  "No — but I ship some goods from Romania. I commit to providing a valid Romanian VAT number.",
+  "I choose to have my sales taxed in the destination country regardless of total sales, and commit to providing valid VAT numbers or OSS registration.",
+];
+
+const NON_EU_OPTIONS = [
+  'No — I do not ship goods worth over €150 "taxed and with duty paid" from a non-EU country to EU buyers.',
+  "Yes — I ship goods worth over €150 from a non-EU country to EU buyers and commit to providing valid VAT numbers for each applicable destination country.",
+];
+
+function thresholdSummary(answer: string) {
+  if (answer.startsWith("Yes")) return "Yes — above €10,000";
+  if (answer.startsWith("No — but")) return "No — ships from Romania";
+  if (answer.startsWith("I choose")) return "Opted in to destination taxation";
+  return "No — below threshold";
+}
+
+function nonEuSummary(answer: string) {
+  return answer.startsWith("Yes") ? "Yes — ships from non-EU" : "No";
+}
+
 function Page() {
   const [vatRows, setVatRows] = useState<VatRow[]>(INITIAL_VAT);
+  const [thresholdAnswer, setThresholdAnswer] = useState(THRESHOLD_ANSWER);
+  const [nonEuAnswer, setNonEuAnswer] = useState(NON_EU_ANSWER);
+  const [ossRegistration, persistOssRegistration] = useOssRegistration();
+
+  const allVerified = vatRows.length > 0 && vatRows.every((r) => r.status === "Verified");
+  const ossDeclared = !effectiveFromError(ossRegistration.effectiveFrom);
+  const questionsAnswered = Boolean(thresholdAnswer && nonEuAnswer);
+
+  const hasVatNumber = vatRows.length > 0;
+  const pendingItems = [
+    !hasVatNumber || !allVerified ? "Add and verify at least one VAT number" : null,
+    !ossDeclared ? "Declare your OSS registration status" : null,
+    !questionsAnswered ? "Answer the tax declaration questions" : null,
+  ].filter((item): item is string => item !== null);
+  const allComplete = pendingItems.length === 0;
 
   return (
     <ModuleLayout>
       <header className="mb-10">
         <h1 className="text-[2rem] text-ink">Tax & VAT</h1>
-        <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground max-w-2xl">
-          Manage your VAT information and tax status for the countries where
-          your products can be sold.
-        </p>
+        <TaxHeaderDescription />
       </header>
 
-      {/* Educational — collapsed by default (Global Rule) */}
       <Accordion type="single" collapsible className="mb-8">
         <AccordionItem value="why" className="border border-line bg-cream/40">
           <AccordionTrigger className="px-7 py-5 hover:no-underline">
@@ -73,213 +134,117 @@ function Page() {
           </AccordionTrigger>
           <AccordionContent className="px-7 pb-6 pl-[60px]">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Camelune uses your tax and VAT information to understand how
-              your seller account can operate across destination countries
-              and whether additional VAT details are required.
+              Camelune uses your tax and VAT information to understand how your
+              seller account can operate across destination countries and whether
+              additional VAT details are required.
             </p>
             <div className="pt-3">
-              {/* TODO: activate when Help Center is published */}
               <HelpLink inline label="Learn more" href="/help/tax-vat" />
             </div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
 
-      {/* Status */}
-      <section className="border border-line bg-background p-7 mb-10">
-        <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
-          Your Tax & VAT status
-        </p>
-        <div className="mt-4 flex items-center gap-3">
-          <CheckCircle2 className="h-5 w-5 text-emerald-700" strokeWidth={1.5} />
-          <p className="text-[17px] text-ink">All clear</p>
+      {!allComplete && <IncompleteAlert items={pendingItems} />}
+
+      <section className="mb-12 border border-line">
+        <div className="px-5 py-4 border-b border-line">
+          <h2 className="text-[15px] text-ink">Tax situation</h2>
         </div>
-        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-          Your VAT registrations are active and we have no outstanding
-          requests for your account.
-        </p>
+        <DeclarationRow
+          label="EU turnover threshold (€10,000)"
+          summary={thresholdSummary(thresholdAnswer)}
+          question="Have you exceeded the EU turnover threshold of €10,000?*"
+          answer={thresholdAnswer}
+          options={THRESHOLD_OPTIONS}
+          onSave={setThresholdAnswer}
+        />
+        <DeclarationRow
+          label="Non-EU shipping to EU buyers"
+          summary={nonEuSummary(nonEuAnswer)}
+          question="Do you ship goods from a non-EU country to EU buyers?*"
+          answer={nonEuAnswer}
+          options={NON_EU_OPTIONS}
+          onSave={setNonEuAnswer}
+        />
+        <div className="grid grid-cols-[1fr_auto] gap-4 px-5 py-3.5 items-center">
+          <div>
+            <p className="text-sm text-muted-foreground">OSS registration</p>
+            <p className="text-sm text-ink mt-0.5">
+              {ossDeclared
+                ? formatOssSummary(ossRegistration)
+                : "Not specified"}
+            </p>
+          </div>
+          <OssRegistrationModal
+            registration={ossRegistration}
+            onSave={persistOssRegistration}
+          />
+        </div>
       </section>
 
-      <Accordion type="multiple" defaultValue={["vat"]} className="space-y-4 mb-10">
-        {/* VAT ID numbers */}
-        <AccordionItem value="vat" className="border border-line bg-background">
-          <AccordionTrigger className="px-6 py-5 hover:no-underline">
-            <div className="flex items-center gap-3">
-              <span className="text-[15px] text-ink">VAT ID number</span>
-              <Badge tone="ok">Verified</Badge>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-6 pb-6">
-            <div className="border border-line">
-              <div className="grid grid-cols-[1fr_1.4fr_140px_120px] px-5 py-3 border-b border-line text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                <div>Country</div>
-                <div>VAT number</div>
-                <div>Status</div>
-                <div className="text-right">Action</div>
-              </div>
-              {vatRows.map((r, i) => (
-                <div
-                  key={r.country}
-                  className="grid grid-cols-[1fr_1.4fr_140px_120px] px-5 py-4 border-b border-line last:border-b-0 text-sm items-center"
+      <section className="mb-12">
+        <h2 className="text-[15px] text-ink mb-4">VAT numbers</h2>
+        <div className="border border-line">
+          <div className="grid grid-cols-[1fr_1.4fr_140px_120px] px-5 py-3 border-b border-line text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            <div>Country</div>
+            <div>VAT number</div>
+            <div>Status</div>
+            <div className="text-right">Action</div>
+          </div>
+          {vatRows.map((r, i) => (
+            <div
+              key={r.country}
+              className="grid grid-cols-[1fr_1.4fr_140px_120px] px-5 py-4 border-b border-line last:border-b-0 text-sm items-center"
+            >
+              <div className="text-ink">{r.country}</div>
+              <div className="text-ink">{r.number}</div>
+              <div>
+                <Badge
+                  tone={
+                    r.status === "Verified"
+                      ? "ok"
+                      : r.status === "Pending verification"
+                        ? "warn"
+                        : "bad"
+                  }
                 >
-                  <div className="text-ink">{r.country}</div>
-                  <div className="text-ink">{r.number}</div>
-                  <div>
-                    <Badge tone={r.status === "Verified" ? "ok" : r.status === "Pending" ? "warn" : "bad"}>
-                      {r.status}
-                    </Badge>
-                  </div>
-                  <div className="text-right">
-                    <EditModal
-                      trigger={
-                        <button className="text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70">
-                          Edit
-                        </button>
-                      }
-                      title={`Edit VAT number — ${r.country}`}
-                      fields={[
-                        { key: "country", label: "Country" },
-                        { key: "number", label: "VAT number", help: "Validated against EU VIES." },
-                      ]}
-                      values={{ country: r.country, number: r.number }}
-                      onSave={(v) => {
-                        const next = [...vatRows];
-                        next[i] = { ...r, country: v.country, number: v.number };
-                        setVatRows(next);
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+                  {r.status}
+                </Badge>
+              </div>
+              <div className="text-right">
+                <VatNumberModal
+                  trigger={
+                    <button className="text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70">
+                      Edit
+                    </button>
+                  }
+                  title={`Edit VAT number — ${r.country}`}
+                  initialCountry={r.country}
+                  initialNumber={r.number}
+                  onSave={(row) => {
+                    const next = [...vatRows];
+                    next[i] = row;
+                    setVatRows(next);
+                  }}
+                />
+              </div>
             </div>
-            <AddVatModal
-              onAdd={(country, number) =>
-                setVatRows([...vatRows, { country, number, status: "Pending" }])
-              }
-            />
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* OSS */}
-        <AccordionItem value="oss" className="border border-line bg-background">
-          <AccordionTrigger className="px-6 py-5 hover:no-underline">
-            <div className="flex items-center gap-3">
-              <span className="text-[15px] text-ink">OSS registration</span>
-              <Badge tone="ok">Active</Badge>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-6 pb-6 space-y-5">
-            <div className="border border-line bg-cream/40 p-5">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                The One Stop Shop (OSS) scheme lets you declare and pay VAT
-                for all EU cross-border sales in a single member state,
-                instead of registering separately in each country.
-              </p>
-            </div>
-            <SavedCard
-              rows={[
-                ["Member state", "Romania"],
-                ["OSS scheme", "Union scheme"],
-                ["Effective from", "01 Jan 2024"],
-              ]}
-              edit={{
-                title: "Edit OSS registration",
-                fields: [
-                  { key: "ms", label: "Member state" },
-                  {
-                    key: "scheme",
-                    label: "OSS scheme",
-                    type: "select",
-                    options: ["Union", "Non-Union", "IOSS"],
-                  },
-                  { key: "from", label: "Effective from" },
-                ],
-                values: {
-                  ms: "Romania",
-                  scheme: "Union",
-                  from: "01 Jan 2024",
-                },
-              }}
-            />
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* Threshold declaration */}
-        <AccordionItem value="threshold" className="border border-line bg-background">
-          <AccordionTrigger className="px-6 py-5 hover:no-underline">
-            <div className="flex items-center gap-3">
-              <span className="text-[15px] text-ink">Destination threshold declaration</span>
-              <Badge tone="ok">Declared</Badge>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-6 pb-6 space-y-5">
-            <div className="border border-line bg-cream/40 p-5">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                If your total intra-EU cross-border sales exceed €10,000 in a
-                calendar year, you must charge VAT in the destination
-                country. This applies across all sales channels, not just
-                Camelune.
-              </p>
-            </div>
-            <SavedCard
-              rows={[
-                ["EU distance-selling threshold status", "Above €10,000 — OSS declared"],
-                ["Declared on", "12 Mar 2026"],
-              ]}
-              edit={{
-                title: "Update destination threshold declaration",
-                fields: [
-                  {
-                    key: "status",
-                    label: "Threshold status",
-                    type: "select",
-                    options: [
-                      "Below €10,000 — single member state",
-                      "Above €10,000 — OSS declared",
-                      "Above €10,000 — individual country VAT",
-                    ],
-                  },
-                  { key: "date", label: "Declared on" },
-                ],
-                values: {
-                  status: "Above €10,000 — OSS declared",
-                  date: "12 Mar 2026",
-                },
-              }}
-            />
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* VAT Q&A */}
-        <AccordionItem value="qa" className="border border-line bg-background">
-          <AccordionTrigger className="px-6 py-5 hover:no-underline">
-            <div className="flex items-center gap-3">
-              <span className="text-[15px] text-ink">VAT questions & answers</span>
-              <Badge tone="ok">Complete</Badge>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-6 pb-6 space-y-6">
-            <QuestionCard
-              question="Have you exceeded the EU turnover threshold of €10,000?"
-              answer="Yes — my total cross-border sales exceed €10,000. I commit to providing valid VAT numbers for each EU country I ship to, or my OSS registration number."
-              options={[
-                "No — my total cross-border sales do not exceed the threshold, or I only sell goods under a margin scheme and do not ship from Germany.",
-                "Yes — my total cross-border sales exceed €10,000. I commit to providing valid VAT numbers for each EU country I ship to, or my OSS registration number.",
-                "No — but I ship some goods from Germany. I commit to providing a valid German VAT number.",
-                "I choose to have my sales taxed in the destination country regardless of total sales, and commit to providing valid VAT numbers or OSS registration.",
-              ]}
-            />
-            <QuestionCard
-              question="Do you ship goods from a non-EU country to Germany?"
-              answer='No — I do not ship goods worth over €150 "taxed and with duty paid" from a non-EU country to Germany.'
-              options={[
-                'No — I do not ship goods worth over €150 "taxed and with duty paid" from a non-EU country to Germany.',
-                "Yes — I ship goods worth over €150 from a non-EU country to Germany and commit to providing a valid German VAT number.",
-              ]}
-            />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+          ))}
+        </div>
+        <VatNumberModal
+          trigger={
+            <button className="mt-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70">
+              <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
+              Add VAT number
+            </button>
+          }
+          title="Add VAT number"
+          initialCountry="Italy"
+          initialNumber=""
+          onSave={(row) => setVatRows([...vatRows, row])}
+        />
+      </section>
 
       <FAQ items={TAX_FAQ} />
     </ModuleLayout>
@@ -288,160 +253,110 @@ function Page() {
 
 /* -------------------- helpers -------------------- */
 
-function Badge({
-  tone,
-  children,
-}: {
-  tone: "ok" | "warn" | "bad" | "neutral";
-  children: React.ReactNode;
-}) {
-  const tc =
-    tone === "ok"
-      ? "bg-emerald-50/70 text-emerald-700"
-      : tone === "warn"
-        ? "bg-amber-50/80 text-amber-800"
-        : tone === "bad"
-          ? "bg-rose-50/70 text-rose-700"
-          : "bg-muted text-muted-foreground";
-  return (
-    <span className={`inline-flex items-center px-2 py-[3px] rounded-full text-[10.5px] tracking-[0.04em] ${tc}`}>
-      {children}
-    </span>
-  );
-}
+function TaxHeaderDescription() {
+  const [expanded, setExpanded] = useState(false);
 
-function SavedCard({
-  rows,
-  edit,
-}: {
-  rows: [string, string][];
-  edit?: {
-    title: string;
-    fields: { key: string; label: string; type?: "text" | "select"; options?: string[] }[];
-    values: Record<string, string>;
-  };
-}) {
   return (
-    <div className="border border-line">
-      <dl className="text-sm divide-y divide-line">
-        {rows.map(([k, v]) => (
-          <div key={k} className="grid grid-cols-[260px_1fr] px-5 py-3">
-            <dt className="text-muted-foreground">{k}</dt>
-            <dd className="text-ink">{v}</dd>
-          </div>
-        ))}
-      </dl>
-      {edit && (
-        <div className="border-t border-line px-5 py-3 flex justify-end">
-          <EditModal
-            trigger={
-              <button className="text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70">
-                Edit
-              </button>
-            }
-            title={edit.title}
-            fields={edit.fields}
-            values={edit.values}
+    <div className="mt-3 max-w-2xl">
+      <p className="text-[15px] leading-relaxed text-muted-foreground">
+        Your VAT registrations and tax status for countries where you sell on
+        Camelune.{" "}
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="inline-flex items-center text-muted-foreground hover:text-ink transition-colors"
+          aria-expanded={expanded}
+        >
+          <ChevronDown
+            className={`h-4 w-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            strokeWidth={1.5}
           />
+        </button>
+      </p>
+
+      {expanded && (
+        <div className="mt-4 space-y-4 text-[15px] leading-relaxed text-muted-foreground">
+          <p>
+            Camelune is established in Romania, an EU member state. Under EU
+            VAT rules, we must collect certain tax information from dealers —
+            both within and outside the EU — so that cross-border sales through
+            the platform can be handled correctly.
+          </p>
+          <p>
+            If your total intra-EU cross-border sales of goods subject to
+            standard taxation exceed{" "}
+            <strong className="font-medium text-ink">€10,000</strong> in the
+            previous or current calendar year, you must charge VAT in the
+            destination country. This applies across{" "}
+            <strong className="font-medium text-ink">all sales channels</strong>,
+            not only Camelune.
+          </p>
+          <p>
+            Please keep this information up to date. We review it regularly and
+            may ask you to confirm your answers if your tax situation changes.
+          </p>
+          <Link
+            to="/help/tax/vat"
+            className="inline-block text-xs text-muted-foreground hover:text-ink transition-colors"
+          >
+            Learn more →
+          </Link>
         </div>
       )}
     </div>
   );
 }
 
-function AddVatModal({ onAdd }: { onAdd: (country: string, number: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const [country, setCountry] = useState("Italy");
-  const [num, setNum] = useState("");
+function IncompleteAlert({ items }: { items: string[] }) {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button className="mt-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70">
-          <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
-          Add VAT number
-        </button>
-      </DialogTrigger>
-      <DialogContent className="bg-background border border-line max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="text-[18px] font-normal text-ink">
-            Add VAT number
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 py-3">
-          <div>
-            <label className="block text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
-              Country
-            </label>
-            <select
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              className="w-full border border-line bg-background px-3 py-2.5 text-sm"
-            >
-              {["Italy", "Spain", "Netherlands", "Belgium", "Austria", "Poland"].map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
-              VAT number
-            </label>
-            <input
-              value={num}
-              onChange={(e) => setNum(e.target.value)}
-              className="w-full border border-line bg-background px-3 py-2.5 text-sm"
-            />
-            <p className="text-xs text-muted-foreground mt-1.5">
-              Format will be validated against EU VIES on save.
-            </p>
-          </div>
-        </div>
-        <DialogFooter className="gap-2">
-          <button
-            onClick={() => setOpen(false)}
-            className="px-5 h-10 border border-line text-xs uppercase tracking-[0.16em] text-ink hover:bg-muted/40"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              if (num.trim()) onAdd(country, num);
-              setOpen(false);
-              setNum("");
-            }}
-            className="px-5 h-10 bg-ink text-cream text-xs uppercase tracking-[0.16em] hover:bg-ink/90"
-          >
-            Save
-          </button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <section className="border border-amber-200/80 bg-amber-50/40 mb-8 px-5 py-4">
+      <p className="text-sm text-ink font-medium">Action required</p>
+      <ul className="mt-2 space-y-1">
+        {items.map((item) => (
+          <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+            <CircleAlert className="h-4 w-4 text-amber-700 mt-0.5 shrink-0" strokeWidth={1.5} />
+            {item}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
-function QuestionCard({
+function DeclarationRow({
+  label,
+  summary,
   question,
   answer,
   options,
+  onSave,
 }: {
+  label: string;
+  summary: string;
   question: string;
   answer: string;
   options: string[];
+  onSave: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(answer);
-  const [current, setCurrent] = useState(answer);
 
   return (
-    <div className="border border-line p-5">
-      <p className="text-[15px] text-ink mb-3">{question}</p>
-      <div className="border border-ink/40 bg-cream/40 p-4 mb-4">
-        <p className="text-sm text-ink leading-relaxed">{current}</p>
+    <div className="grid grid-cols-[1fr_auto] gap-4 px-5 py-3.5 border-b border-line items-center">
+      <div>
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="text-sm text-ink mt-0.5">{summary}</p>
       </div>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (next) setSelected(answer);
+        }}
+      >
         <DialogTrigger asChild>
           <button className="text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70">
-            Change answer
+            Change
           </button>
         </DialogTrigger>
         <DialogContent className="bg-background border border-line max-w-xl">
@@ -475,12 +390,12 @@ function QuestionCard({
             </button>
             <button
               onClick={() => {
-                setCurrent(selected);
+                onSave(selected);
                 setOpen(false);
               }}
               className="px-5 h-10 bg-ink text-cream text-xs uppercase tracking-[0.16em] hover:bg-ink/90"
             >
-              Save answer
+              Save
             </button>
           </DialogFooter>
         </DialogContent>
@@ -489,10 +404,247 @@ function QuestionCard({
   );
 }
 
-const TAX_FAQ = [
-  { q: "What is the EU distance-selling threshold?", a: "If your total intra-EU cross-border sales of goods exceed €10,000 in a calendar year, you must charge VAT in the destination country." },
-  { q: "What is OSS and do I need it?", a: "The One Stop Shop (OSS) is an EU system that lets you declare all EU cross-border VAT in a single member state. It is optional but usually simpler than registering in each destination country." },
-  { q: "Why does Camelune need my VAT number?", a: "Camelune uses your VAT information to operate your account compliantly across destination markets, including determining how invoices are issued." },
-  { q: "What is the margin scheme?", a: "For second-hand goods, sellers may use a margin scheme where VAT is only applied to the difference between purchase and sale price. This is important for many Camelune sellers." },
-  { q: "What happens if my VAT number is not valid?", a: "We will flag the VAT number, notify you by email and ask you to provide a correct number. Sales in that country may be paused while the issue is resolved." },
-];
+function Badge({
+  tone,
+  children,
+}: {
+  tone: "ok" | "warn" | "bad" | "neutral";
+  children: ReactNode;
+}) {
+  const tc =
+    tone === "ok"
+      ? "bg-emerald-50/70 text-emerald-700"
+      : tone === "warn"
+        ? "bg-amber-50/80 text-amber-800"
+        : tone === "bad"
+          ? "bg-rose-50/70 text-rose-700"
+          : "bg-muted text-muted-foreground";
+  return (
+    <span className={`inline-flex items-center px-2 py-[3px] rounded-full text-[10.5px] tracking-[0.04em] ${tc}`}>
+      {children}
+    </span>
+  );
+}
+
+function OssRegistrationModal({
+  registration,
+  onSave,
+}: {
+  registration: OssRegistration;
+  onSave: (next: OssRegistration) => boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<OssRegistration>(registration);
+  const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [dateError, setDateError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setDraft(registration);
+      setDateError(null);
+      setSaveError(null);
+      setSaved(false);
+    }
+  }, [open, registration]);
+
+  function handleSave() {
+    const error = effectiveFromError(draft.effectiveFrom);
+    if (error) {
+      setDateError(error);
+      return;
+    }
+    const didSave = onSave(draft);
+    if (!didSave) {
+      setSaveError("Could not save your OSS registration. Please try again.");
+      return;
+    }
+    setSaveError(null);
+    setSaved(true);
+    setTimeout(() => setOpen(false), 600);
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={setOpen}
+    >
+      <DialogTrigger asChild>
+        <button className="text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70">
+          Change
+        </button>
+      </DialogTrigger>
+      <DialogContent className="bg-background border border-line max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-[18px] font-normal text-ink">
+            Edit OSS registration
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-3">
+          <div>
+            <label className={complianceFieldLabelClass}>Member state</label>
+            <ComplianceSelect
+              value={draft.memberState}
+              onValueChange={(memberState) => setDraft({ ...draft, memberState })}
+              options={OSS_MEMBER_STATES}
+            />
+          </div>
+          <div>
+            <label className={complianceFieldLabelClass}>OSS scheme</label>
+            <ComplianceSelect
+              value={draft.scheme}
+              onValueChange={(scheme) =>
+                setDraft({ ...draft, scheme: scheme as OssScheme })
+              }
+              options={["Union", "Non-Union", "IOSS"]}
+            />
+          </div>
+          <div>
+            <label className={complianceFieldLabelClass}>Effective from</label>
+            <ComplianceDatePicker
+              value={draft.effectiveFrom}
+              onChange={(effectiveFrom) => {
+                setDraft({ ...draft, effectiveFrom });
+                setDateError(effectiveFromError(effectiveFrom));
+                setSaveError(null);
+              }}
+              error={dateError}
+            />
+          </div>
+        </div>
+        {saved && <p className="text-xs text-emerald-700">Saved.</p>}
+        {saveError && <p className="text-xs text-rose-700">{saveError}</p>}
+        <DialogFooter className="gap-2">
+          <button
+            onClick={() => setOpen(false)}
+            className="px-5 h-10 border border-line text-xs uppercase tracking-[0.16em] text-ink hover:bg-muted/40"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!!dateError || !draft.effectiveFrom}
+            className="px-5 h-10 bg-ink text-cream text-xs uppercase tracking-[0.16em] hover:bg-ink/90 disabled:opacity-40"
+          >
+            Save
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function VatNumberModal({
+  trigger,
+  title,
+  initialCountry,
+  initialNumber,
+  onSave,
+}: {
+  trigger: ReactNode;
+  title: string;
+  initialCountry: string;
+  initialNumber: string;
+  onSave: (row: VatRow) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [country, setCountry] = useState(initialCountry);
+  const [number, setNumber] = useState(initialNumber);
+  const [touched, setTouched] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const formatError =
+    touched && number.trim() ? vatFormatError(country, number) : null;
+
+  function resetForm() {
+    setCountry(initialCountry);
+    setNumber(initialNumber);
+    setTouched(false);
+    setSaveError(null);
+  }
+
+  function handleSave() {
+    const result = verifyVatNumber(country, number);
+    if (result.error) {
+      setSaveError(result.error);
+      setTouched(true);
+      return;
+    }
+    onSave({
+      country,
+      number: formatVatDisplay(result.normalized, country as VatCountry),
+      status: result.status,
+    });
+    setOpen(false);
+    resetForm();
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) resetForm();
+      }}
+    >
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="bg-background border border-line max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-[18px] font-normal text-ink">{title}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-3">
+          <div>
+            <label className={complianceFieldLabelClass}>Country</label>
+            <ComplianceSelect
+              value={country}
+              onValueChange={(next) => {
+                setCountry(next);
+                setTouched(true);
+              }}
+              options={VAT_COUNTRIES}
+            />
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
+              VAT number
+            </label>
+            <input
+              value={number}
+              onChange={(e) => {
+                setNumber(e.target.value);
+                setSaveError(null);
+              }}
+              onBlur={() => setTouched(true)}
+              className={`w-full border bg-background px-3 py-2.5 text-sm focus:outline-none ${
+                formatError || saveError
+                  ? "border-rose-400 focus:border-rose-500"
+                  : "border-line focus:border-ink"
+              }`}
+            />
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Validated against EU VIES on save. Invalid numbers cannot be verified.
+            </p>
+            {(formatError || saveError) && (
+              <p className="text-xs text-rose-700 mt-2">{formatError ?? saveError}</p>
+            )}
+          </div>
+        </div>
+        <DialogFooter className="gap-2">
+          <button
+            onClick={() => setOpen(false)}
+            className="px-5 h-10 border border-line text-xs uppercase tracking-[0.16em] text-ink hover:bg-muted/40"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!number.trim() || !!formatError}
+            className="px-5 h-10 bg-ink text-cream text-xs uppercase tracking-[0.16em] hover:bg-ink/90 disabled:opacity-40"
+          >
+            Save
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

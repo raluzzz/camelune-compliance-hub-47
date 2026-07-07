@@ -5,6 +5,7 @@ import {
   OBLIGATIONS,
   CATEGORY_LABEL,
   COUNTRY_LABEL,
+  obligationDetailLink,
   type EprCategory,
 } from "@/lib/epr-data";
 
@@ -58,21 +59,19 @@ function Page() {
                   </p>
                 </div>
                 <div className="space-y-3">
-                  {rows.map((r) => (
-                    <Link
-                      key={r.id}
-                      to="/seller/compliance/epr/packaging-germany"
-                      className="flex items-center justify-between py-2.5 border-b border-line last:border-0 hover:text-ink"
-                    >
-                      <span className="text-sm text-ink">{COUNTRY_LABEL[r.country]}</span>
-                      <div className="flex items-center gap-4">
-                        <span className="text-xs text-muted-foreground">
-                          {r.affectedProducts > 0 ? `${r.affectedProducts} listings` : "—"}
-                        </span>
-                        <StatusBadge status={r.status} />
-                      </div>
-                    </Link>
-                  ))}
+                  {rows.map((r) => {
+                    const dest = obligationDetailLink(r);
+                    return (
+                      <Link
+                        key={r.id}
+                        to={dest.to}
+                        params={dest.params}
+                        className="flex items-center justify-between py-2.5 border-b border-line last:border-0 hover:text-ink"
+                      >
+                        <RowContent r={r} />
+                      </Link>
+                    );
+                  })}
                 </div>
               </section>
             );
@@ -80,5 +79,19 @@ function Page() {
         </div>
       </div>
     </SellerLayout>
+  );
+}
+
+function RowContent({ r }: { r: (typeof OBLIGATIONS)[number] }) {
+  return (
+    <>
+      <span className="text-sm text-ink">{COUNTRY_LABEL[r.country]}</span>
+      <div className="flex items-center gap-4">
+        <span className="text-xs text-muted-foreground">
+          {r.affectedProducts > 0 ? `${r.affectedProducts} listings` : "—"}
+        </span>
+        <StatusBadge status={r.status} />
+      </div>
+    </>
   );
 }
