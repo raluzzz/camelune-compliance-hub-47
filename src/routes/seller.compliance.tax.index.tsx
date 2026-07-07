@@ -2,14 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { FAQ } from "@/components/seller/FAQ";
-import { HelpLink } from "@/components/seller/HelpLink";
 import { TAX_FAQ } from "@/lib/tax-help-data";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {
   VAT_COUNTRIES,
   formatVatDisplay,
@@ -39,7 +32,7 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ChevronDown, CircleAlert, Info, Plus } from "lucide-react";
+import { ChevronDown, CircleAlert, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/seller/compliance/tax/")({
   head: () => ({
@@ -120,30 +113,6 @@ function Page() {
         <h1 className="text-[2rem] text-ink">Tax & VAT</h1>
         <TaxHeaderDescription />
       </header>
-
-      <Accordion type="single" collapsible className="mb-8">
-        <AccordionItem value="why" className="border border-line bg-cream/40">
-          <AccordionTrigger className="px-7 py-5 hover:no-underline">
-            <div className="flex items-center gap-4 text-left">
-              <Info className="h-5 w-5 text-ink-soft shrink-0" strokeWidth={1.5} />
-              <span className="text-[15px] text-ink">
-                Why we ask for Tax & VAT information
-              </span>
-              <span className="text-xs text-muted-foreground ml-2">Learn more</span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-7 pb-6 pl-[60px]">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Camelune uses your tax and VAT information to understand how your
-              seller account can operate across destination countries and whether
-              additional VAT details are required.
-            </p>
-            <div className="pt-3">
-              <HelpLink inline label="Learn more" href="/help/tax-vat" />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
 
       {!allComplete && <IncompleteAlert items={pendingItems} />}
 

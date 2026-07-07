@@ -126,34 +126,6 @@ function Page() {
         </p>
       </header>
 
-      <Accordion type="single" collapsible className="mb-8">
-        <AccordionItem value="what" className="border border-line bg-cream/40">
-          <AccordionTrigger className="px-7 py-5 hover:no-underline">
-            <div className="flex items-center gap-4 text-left">
-              <Info className="h-5 w-5 text-ink-soft shrink-0" strokeWidth={1.5} />
-              <span className="text-[15px] text-ink">What is DAC7?</span>
-              <span className="text-xs text-muted-foreground ml-2">Learn more</span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-7 pb-6 pl-[60px]">
-            <div className="text-sm text-muted-foreground leading-relaxed space-y-3">
-              <p>
-                DAC7 may require digital platforms to collect, verify and report
-                information about sellers and the income they earn through the
-                platform.
-              </p>
-              <p>
-                DAC7 is not a new tax. It is a reporting obligation for digital
-                platforms.
-              </p>
-              <div className="pt-2">
-                <HelpLink inline label="Learn more" href="/help/dac7" />
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-
       <MergedStatusCard
         status={mergedStatus}
         reportingPeriod={DAC7.reportingPeriod}

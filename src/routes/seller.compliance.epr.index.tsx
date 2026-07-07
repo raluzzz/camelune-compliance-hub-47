@@ -2,15 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { FAQ } from "@/components/seller/FAQ";
-import { HelpLink } from "@/components/seller/HelpLink";
 import { EPR_FAQ } from "@/lib/epr-help-data";
 import { EprPartnerNotice } from "@/components/seller/EprPartnerNotice";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {
   OBLIGATIONS,
   CATEGORY_LABEL,
@@ -32,7 +25,7 @@ import {
   shouldShowInEprTabs,
   type EprCounterKey,
 } from "@/lib/epr-stats";
-import { ArrowRight, ChevronDown, Info } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -168,29 +161,6 @@ function Page() {
         <h1 className="text-[2rem] text-ink">EPR Compliance</h1>
         <EprHeaderDescription />
       </header>
-
-      <Accordion type="single" collapsible className="mb-8">
-        <AccordionItem value="what" className="border border-line bg-cream/40">
-          <AccordionTrigger className="px-7 py-5 hover:no-underline">
-            <div className="flex items-center gap-4 text-left">
-              <Info className="h-5 w-5 text-ink-soft shrink-0" strokeWidth={1.5} />
-              <span className="text-[15px] text-ink">What is EPR?</span>
-              <span className="text-xs text-muted-foreground ml-2">Learn more</span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-7 pb-6 pl-[60px]">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              EPR obliges producers to ensure their products are designed, used
-              and disposed of in an environmentally responsible way. Sellers who
-              ship products to EU countries are considered producers and must
-              comply.
-            </p>
-            <div className="pt-3">
-              <HelpLink inline label="Learn more" href="/help/epr" />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
 
       <EprPartnerNotice />
 
