@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { FAQ } from "@/components/seller/FAQ";
-import { HelpLink } from "@/components/seller/HelpLink";
 import {
   Accordion,
   AccordionContent,
@@ -20,7 +19,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   ArrowRight,
-  ArrowUpRight,
   Info,
   CircleAlert,
 } from "lucide-react";
@@ -409,20 +407,6 @@ function Page() {
         </AccordionItem>
       </Accordion>
 
-      <section className="border border-line bg-background p-7 mb-12">
-        <p className="text-[15px] text-ink mb-4">Helpful links</p>
-        <ul className="space-y-3 text-sm">
-          <li><HelpLink label="Learn more about DAC7" href="/help/dac7" /></li>
-          <li><HelpLink label="View how Camelune uses your data" href="/help/dac7/data-privacy" /></li>
-          <li>
-            <a href="/seller/help" className="inline-flex items-center gap-2 text-sm text-ink hover:opacity-70">
-              Contact support
-              <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.5} />
-            </a>
-          </li>
-        </ul>
-      </section>
-
       <FAQ items={DAC7_FAQ} />
     </ModuleLayout>
   );
@@ -651,8 +635,24 @@ function ReportRow({
 }
 
 const DAC7_FAQ = [
-  { q: "Is DAC7 a new tax?", a: "No. DAC7 is not a new tax. It is a reporting obligation for digital platforms." },
-  { q: "Why does Camelune need this information?", a: "Camelune must determine whether reporting is required and file accurate reports if you meet the thresholds." },
-  { q: "When will I be reported?", a: "When you reach at least 30 sales or €2,000 in total transaction value during a calendar year. Reaching either threshold triggers reporting." },
-  { q: "How is my data protected?", a: "Your data is encrypted at rest and in transit, and only the specific fields required by DAC7 are shared with the relevant tax authority through secure channels." },
+  {
+    q: "What is DAC7?",
+    a: "DAC7 is EU Council Directive 2021/514. It requires digital platforms like Camelune to collect identification and income data from sellers and report it annually to tax authorities. The rules apply to platforms that facilitate the sale of goods, personal services, property rentals, or transport rentals. The obligation sits with the platform operator — not with you filing a separate DAC7 return. The aim is greater tax transparency: member states automatically exchange this information so each country can assess income tax and VAT under its existing national rules.",
+  },
+  {
+    q: "Is DAC7 a new tax?",
+    a: "No. DAC7 does not create a new tax and does not change how your income is taxed. Your sales remain subject to the income tax and VAT rules that already apply in your country. What changes is that Camelune must share certain information with tax authorities when reporting conditions are met. Receiving a DAC7 report does not automatically mean you owe additional tax — authorities use the data to check whether your own tax returns are complete and accurate. You are still responsible for declaring your income and paying any tax due under your national rules, including income earned outside Camelune.",
+  },
+  {
+    q: "Why does Camelune need this information?",
+    a: "As a reporting platform operator, Camelune is legally required to collect, verify, and submit seller data under DAC7. The sections on this page — company details, commercial registration number, taxpayer ID (such as your CUI), VAT number, and bank account for payouts — correspond to the fields tax authorities expect in an annual report. We use this information to confirm your identity, determine whether you meet the reporting threshold, and file an accurate report by 31 January for the previous calendar year if required. Providing correct details now helps avoid delays or corrections later. If information is missing or incorrect, we may need to contact you before we can complete our reporting obligations.",
+  },
+  {
+    q: "When will I be reported?",
+    a: "For sellers of goods on Camelune, reporting is triggered when you reach either 30 completed sales or €2,000 in total transaction value during a single calendar year — reaching one of these thresholds is enough. If you stay below both limits for the full year, Camelune generally does not need to report your activity for that period. When a report is due, Camelune submits it to the competent EU tax authority by 31 January of the following year (for example, 2025 activity is reported by 31 January 2026). You can track your progress toward the threshold on this page. Before or after submission, you should review the reported figures and contact us if anything looks wrong.",
+  },
+  {
+    q: "How is my data protected?",
+    a: "Camelune collects only the information required by DAC7 and handles it in line with applicable data-protection rules, including the GDPR. Your details are stored securely and shared with tax authorities only for the purpose of DAC7 reporting — not for marketing or unrelated uses. Under the directive, the receiving authority may exchange your data with other EU member states where you are resident, established, or carry out relevant activity. You are informed that this reporting takes place; that is part of the legal framework platforms must follow. If you have questions about how a specific tax authority uses or stores reported data, you can contact that authority directly in your country of residence.",
+  },
 ];
