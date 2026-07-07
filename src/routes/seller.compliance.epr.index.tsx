@@ -40,7 +40,7 @@ export const Route = createFileRoute("/seller/compliance/epr/")({
       {
         name: "description",
         content:
-          "Extended Producer Responsibility for packaging, batteries and electrical products in EU destination countries.",
+          "Extended Producer Responsibility for your registered business — packaging, batteries and electrical products in EU markets.",
       },
     ],
   }),
@@ -86,7 +86,7 @@ const CATEGORY_DESCRIPTION: Record<
 > = {
   packaging: {
     title: "Packaging (PACK)",
-    body: "Sellers who ship packaged goods to EU countries are required to register with the national packaging authority in each destination market and report the volumes placed on that market.",
+    body: "Registered businesses that ship packaged goods to EU countries are required to register with the national packaging authority in each destination market and report the volumes placed on that market.",
     helpPath: "/help/epr/packaging",
   },
   batteries: {
@@ -96,7 +96,7 @@ const CATEGORY_DESCRIPTION: Record<
   },
   weee: {
     title: "Electrical appliances (EEE)",
-    body: "Electrical and electronic equipment sold into EU destination countries must be registered under the WEEE directive in each applicable market, regardless of where the seller is established.",
+    body: "Electrical and electronic equipment sold into EU destination countries must be registered under the WEEE directive in each applicable market, regardless of where your company is established.",
     helpPath: "/help/epr/weee",
   },
   textiles: null,
@@ -129,7 +129,7 @@ function EprHeaderDescription() {
       {expanded && (
         <div className="mt-3">
           <p className="text-[15px] leading-relaxed text-muted-foreground">
-            On Camelune, sellers who ship products to EU countries are
+            On Camelune, registered businesses that ship products to EU countries are
             considered producers under local law, and may be required to
             register and report for packaging, batteries and electrical
             products in each destination country where their listings are sold.
@@ -166,9 +166,9 @@ function Page() {
 
       {isNonEuSeller && (
         <section className="border border-line bg-background p-6 mb-8">
-          <p className="text-[15px] text-ink">You are registered outside the EU</p>
+          <p className="text-[15px] text-ink">Your company is registered outside the EU</p>
           <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-2xl">
-            Sellers registered outside the EU may be required to appoint an
+            Companies registered outside the EU may be required to appoint an
             authorised representative in certain EU countries (e.g. Germany
             under VerpackG, France for packaging from August 2026). The
             relevant detail pages will indicate when this is mandatory.

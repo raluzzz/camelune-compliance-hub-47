@@ -9,7 +9,7 @@ import {
   dac7MissingSectionLetters,
   getDac7ReportRecord,
 } from "@/lib/dac7-data";
-import { ArrowRight, CheckCircle2, Info } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/seller/compliance/dac7/period/$year")({
   head: ({ params }) => ({
@@ -75,10 +75,7 @@ function Page() {
 
       {isCurrentPeriod && (
         <section className="border border-line bg-background p-7 mb-10">
-          <div className="flex items-center gap-2 mb-6">
-            <p className="text-[15px] text-ink">Threshold progress</p>
-            <Info className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
-          </div>
+          <p className="text-[15px] text-ink mb-6">Threshold progress</p>
           <div className="space-y-7">
             <ThresholdRow
               label="Sales"

@@ -10,16 +10,9 @@ import {
 } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   CheckCircle2,
   AlertTriangle,
   ArrowRight,
-  Info,
   CircleAlert,
 } from "lucide-react";
 import { DAC7 } from "@/lib/epr-data";
@@ -31,7 +24,6 @@ import {
   dac7InformationComplete,
   dac7MissingSectionLetters,
   getDefaultTaxpayerRow,
-  getSectionDescriptions,
   loadExtraTaxpayerIds,
   taxpayerFieldLabel,
   taxpayerSectionTitle,
@@ -48,7 +40,7 @@ export const Route = createFileRoute("/seller/compliance/dac7/")({
       {
         name: "description",
         content:
-          "DAC7 is an EU platform reporting rule. Camelune may collect and report seller information to tax authorities when reporting conditions are met.",
+          "DAC7 platform reporting for your registered business — income reported to tax authorities when thresholds are met.",
       },
     ],
   }),
@@ -102,7 +94,6 @@ function Page() {
         : "Not required";
 
   const reportingDeadline = `January 31, ${DAC7.reportingPeriod + 1}`;
-  const descriptions = getSectionDescriptions(DAC7_SELLER.companyCountryCode);
   const tinLabel = taxpayerFieldLabel(DAC7_SELLER.taxpayerIssuingCountry);
 
   return (
@@ -118,9 +109,9 @@ function Page() {
           >
             EU Directive 2021/514
           </a>{" "}
-          (&quot;DAC7&quot;) requires Camelune to report seller income to tax
-          authorities. This applies if you exceed 30 sales or €2,000 in revenue
-          per year.
+          (&quot;DAC7&quot;) requires Camelune to report your company&apos;s platform
+          income to tax authorities when you exceed 30 sales or €2,000 in revenue
+          per calendar year.
         </p>
       </header>
 
@@ -134,222 +125,17 @@ function Page() {
         reportedReference={currentPeriodReport?.reference}
       />
 
-      <h2 className="text-lg text-ink border-b border-line pb-4 mb-8">
-        Your reported information
-      </h2>
-
-      {/* A. Company information */}
-      <section className="mb-10">
-        <h3 className="text-[15px] font-medium text-ink mb-1">Company information</h3>
-        <p className="text-sm text-muted-foreground mb-5 leading-relaxed max-w-2xl">
-          You provided the following information regarding the legal representative
-          and address of your company.
-        </p>
-        <div className="space-y-4 text-sm text-ink">
-          <div>
-            <p className="text-muted-foreground text-xs uppercase tracking-[0.12em] mb-0.5">
-              Company legal name
-            </p>
-            <p>{DAC7_SELLER.companyName}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground text-xs uppercase tracking-[0.12em] mb-0.5">
-              Registered address
-            </p>
-            <p>{DAC7_SELLER.registeredAddress}</p>
-            <p>{DAC7_SELLER.companyCountry}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground text-xs uppercase tracking-[0.12em] mb-0.5">
-              Legal representative
-            </p>
-            <p>{DAC7_SELLER.legalRepresentative}</p>
-          </div>
-        </div>
-      </section>
-
-      {/* B. Commercial registration number */}
-      <section className="mb-10">
-        <h3 className="text-[15px] font-medium text-ink mb-1">Commercial registration number</h3>
-        <p className="text-sm text-muted-foreground mb-5 leading-relaxed max-w-2xl">
-          {descriptions.registration}
-        </p>
-        <InfoTable
-          header={
-            <>
-              <span>Country</span>
-              <span>Commercial registration number</span>
-              <span aria-hidden="true" />
-              <span>Status</span>
-            </>
-          }
-          row={
-            <>
-              <span>{DAC7_SELLER.companyCountry}</span>
-              <span>{DAC7_SELLER.registrationNumber}</span>
-              <span aria-hidden="true" />
-              <StatusPill status={sectionStatus("registration")} />
-            </>
-          }
-        />
-      </section>
-
-      {/* C. Taxpayer ID */}
-      <section className="mb-10">
-        <h3 className="text-[15px] font-medium text-ink mb-1">
-          {taxpayerSectionTitle(DAC7_SELLER.taxpayerIssuingCountry)}
-        </h3>
-        <p className="text-sm text-muted-foreground mb-5 leading-relaxed max-w-2xl">
-          {descriptions.taxpayer}
-        </p>
-        <InfoTable
-          header={
-            <>
-              <span>Issuing country</span>
-              <span>{tinLabel}</span>
-              <span>Permanent establishment</span>
-              <span>Status</span>
-            </>
-          }
-          rows={taxpayerRows.map((row) => ({
-            key: `${row.issuingCountry}-${row.taxpayerId}`,
-            cells: (
-              <>
-                <span>{row.issuingCountry}</span>
-                <span>{row.taxpayerId}</span>
-                <span>{row.permanentEstablishment}</span>
-                <StatusPill
-                  status={
-                    validateTaxpayerId(row.issuingCountry, row.taxpayerId)
-                      ? sectionStatus("taxpayer")
-                      : "Error"
-                  }
-                />
-              </>
-            ),
-          }))}
-        />
-        <Link
-          to="/seller/compliance/dac7/taxpayer-id/add"
-          className="mt-4 inline-flex items-center gap-2 text-sm text-ink border border-line px-4 py-2 hover:bg-muted/30 transition-colors"
-        >
-          <span className="text-lg leading-none">+</span> Add number
-        </Link>
-        {taxpayerIdInvalid && (
-          <p className="mt-4 text-sm text-rose-700 flex items-start gap-2 leading-relaxed">
-            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" strokeWidth={1.5} />
-            <span>
-              One or more of the numbers you provided has an unknown format. Please
-              correct the format or{" "}
-              <a
-                href={DAC7_SUPPORT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-2 hover:opacity-80"
-              >
-                email us at support
-              </a>
-              .
-            </span>
-          </p>
-        )}
-      </section>
-
-      {/* D. VAT ID number */}
-      <section className="mb-10">
-        <h3 className="text-[15px] font-medium text-ink mb-1">Your VAT ID number</h3>
-        <p className="text-sm text-muted-foreground mb-5 leading-relaxed max-w-2xl">
-          You provided the following VAT ID number. If necessary, please make changes on our{" "}
-          <Link to="/seller/compliance/tax" className="underline underline-offset-2 hover:opacity-80">
-            VAT information
-          </Link>{" "}
-          page.
-        </p>
-        <InfoTable
-          header={
-            <>
-              <span>Country</span>
-              <span>VAT number</span>
-              <span aria-hidden="true" />
-              <span>Status</span>
-            </>
-          }
-          row={
-            <>
-              <span>{DAC7_SELLER.companyCountry}</span>
-              <span>{DAC7_SELLER.vatNumber}</span>
-              <span aria-hidden="true" />
-              <StatusPill status="Validated" />
-            </>
-          }
-        />
-      </section>
-
-      {/* E. Bank account for payouts */}
-      <section className="mb-10">
-        <h3 className="text-[15px] font-medium text-ink mb-1">Bank account for payouts</h3>
-        <p className="text-sm text-muted-foreground mb-5 leading-relaxed max-w-2xl">
-          Reimbursements and payments from our escrow account are transferred to the
-          following bank account:
-        </p>
-        <div className="text-sm text-ink space-y-1">
-          <p>Account holder: {DAC7_SELLER.bankAccountHolder}</p>
-          <p>IBAN: {DAC7_SELLER.bankIban}</p>
-          <p>Currency: {DAC7_SELLER.bankCurrency}</p>
-        </div>
-      </section>
-
-      <div className="mb-10 pt-2 border-t border-line">
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="dac7-confirm"
-            checked={confirmed}
-            onChange={(e) => setConfirmed(e.target.checked)}
-            className="mt-0.5 h-4 w-4 accent-ink cursor-pointer"
-          />
-          <label htmlFor="dac7-confirm" className="text-sm text-ink leading-relaxed cursor-pointer">
-            I hereby confirm that the information I have provided is correct.
-          </label>
-        </div>
-        {confirmed ? (
-          <p className="mt-3 text-sm text-emerald-700">
-            Confirmation recorded. Camelune will use this information for DAC7
-            reporting if you meet the threshold.
-          </p>
-        ) : (
-          <p className="mt-3 text-sm text-muted-foreground">
-            Please confirm your details are accurate so Camelune can include them
-            in any required DAC7 report.
-          </p>
-        )}
-      </div>
+      <ReportedInformationPanel
+        confirmed={confirmed}
+        onConfirmedChange={setConfirmed}
+        tinLabel={tinLabel}
+        taxpayerRows={taxpayerRows}
+        taxpayerIdInvalid={taxpayerIdInvalid}
+        sectionStatus={sectionStatus}
+      />
 
       <section className="border border-line bg-background p-7 mb-8">
-        <TooltipProvider>
-          <div className="flex items-center gap-2">
-            <p className="text-[15px] text-ink">Threshold progress</p>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  className="text-muted-foreground hover:text-ink transition-colors"
-                  aria-label="How thresholds work"
-                >
-                  <Info className="h-3.5 w-3.5" strokeWidth={1.5} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="bg-ink text-cream border-0 max-w-[280px] text-xs leading-relaxed font-normal"
-              >
-                Thresholds reset on 1 January each year. Both sales count and
-                revenue are tracked independently — reaching either one triggers
-                reporting.
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
+        <p className="text-[15px] text-ink">Threshold progress</p>
         <div className="mt-6 space-y-7">
           <ProgressRow
             label="Sales"
@@ -412,33 +198,211 @@ function Page() {
   );
 }
 
-/* -------------------- helpers -------------------- */
+/* -------------------- reported information -------------------- */
 
-const INFO_TABLE_GRID =
-  "grid grid-cols-[minmax(150px,22%)_minmax(180px,28%)_minmax(200px,28%)_minmax(100px,120px)] gap-x-6 items-center";
+const TABLE_GRID_4 =
+  "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.2fr)_140px] items-center";
+
+function ReportedInformationPanel({
+  confirmed,
+  onConfirmedChange,
+  tinLabel,
+  taxpayerRows,
+  taxpayerIdInvalid,
+  sectionStatus,
+}: {
+  confirmed: boolean;
+  onConfirmedChange: (value: boolean) => void;
+  tinLabel: string;
+  taxpayerRows: Dac7TaxpayerIdRow[];
+  taxpayerIdInvalid: boolean;
+  sectionStatus: (id: string) => Dac7SectionStatus;
+}) {
+  return (
+    <div className="mb-12">
+      <h2 className="text-lg text-ink mb-8">Your reported information</h2>
+
+      <div className="divide-y divide-line text-sm">
+        <ReportedGroup title="Company">
+          <p className="text-ink">{DAC7_SELLER.companyName}</p>
+          <p className="text-muted-foreground mt-1">
+            {DAC7_SELLER.registeredAddress}, {DAC7_SELLER.companyCountry}
+          </p>
+          <p className="mt-2 text-ink">
+            <span className="text-muted-foreground">Legal representative · </span>
+            {DAC7_SELLER.legalRepresentative}
+          </p>
+        </ReportedGroup>
+
+        <ReportedGroup title="Commercial registration">
+          <p className="text-ink flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span>{DAC7_SELLER.companyCountry}</span>
+            <span className="text-muted-foreground">·</span>
+            <span>{DAC7_SELLER.registrationNumber}</span>
+            <span className="text-muted-foreground">·</span>
+            <StatusPill status={sectionStatus("registration")} />
+          </p>
+        </ReportedGroup>
+
+        <ReportedGroup title="VAT number">
+          <p className="text-ink flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span>{DAC7_SELLER.companyCountry}</span>
+            <span className="text-muted-foreground">·</span>
+            <span>{DAC7_SELLER.vatNumber}</span>
+            <span className="text-muted-foreground">·</span>
+            <StatusPill status="Validated" />
+          </p>
+          <Link
+            to="/seller/compliance/tax"
+            className="inline-block mt-2 text-xs text-muted-foreground hover:text-ink underline-offset-4 hover:underline"
+          >
+            Edit on VAT information page
+          </Link>
+        </ReportedGroup>
+
+        <ReportedGroup title="Bank account for payouts">
+          <p className="text-ink">
+            {DAC7_SELLER.bankAccountHolder}
+            <span className="text-muted-foreground"> · </span>
+            {DAC7_SELLER.bankIban}
+            <span className="text-muted-foreground"> · </span>
+            {DAC7_SELLER.bankCurrency}
+          </p>
+        </ReportedGroup>
+      </div>
+
+      <section className="mt-10">
+        <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground mb-4">
+          {taxpayerSectionTitle()}
+        </p>
+        <div className="border border-line">
+          <InfoTable
+            gridClass={TABLE_GRID_4}
+            header={
+              <>
+                <span>Issuing country</span>
+                <span>{tinLabel}</span>
+                <span>Permanent establishment</span>
+                <span>Status</span>
+              </>
+            }
+            rows={taxpayerRows.map((row) => ({
+              key: `${row.issuingCountry}-${row.taxpayerId}`,
+              cells: (
+                <>
+                  <span>{row.issuingCountry}</span>
+                  <span>{row.taxpayerId}</span>
+                  <span>{row.permanentEstablishment}</span>
+                  <StatusPill
+                    status={
+                      validateTaxpayerId(row.issuingCountry, row.taxpayerId)
+                        ? sectionStatus("taxpayer")
+                        : "Error"
+                    }
+                  />
+                </>
+              ),
+            }))}
+          />
+        </div>
+        <Link
+          to="/seller/compliance/dac7/taxpayer-id/add"
+          className="mt-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70"
+        >
+          <span className="text-base leading-none">+</span> Add number
+        </Link>
+        {taxpayerIdInvalid && (
+          <p className="mt-4 text-sm text-rose-700 flex items-start gap-2 leading-relaxed">
+            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" strokeWidth={1.5} />
+            <span>
+              One or more of the numbers you provided has an unknown format. Please
+              correct the format or{" "}
+              <a
+                href={DAC7_SUPPORT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:opacity-80"
+              >
+                email us at support
+              </a>
+              .
+            </span>
+          </p>
+        )}
+      </section>
+
+      <div className="pt-8 mt-10 border-t border-line">
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id="dac7-confirm"
+            checked={confirmed}
+            onChange={(e) => onConfirmedChange(e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-ink cursor-pointer"
+          />
+          <label htmlFor="dac7-confirm" className="text-sm text-ink leading-relaxed cursor-pointer">
+            I hereby confirm that the information I have provided is correct.
+          </label>
+        </div>
+        {confirmed ? (
+          <p className="mt-3 text-sm text-emerald-700">
+            Confirmation recorded. Camelune will use this information for DAC7
+            reporting if you meet the threshold.
+          </p>
+        ) : (
+          <p className="mt-3 text-sm text-muted-foreground">
+            Please confirm your details are accurate so Camelune can include them
+            in any required DAC7 report.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ReportedGroup({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="py-5 first:pt-0 last:pb-0">
+      <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground mb-2.5">
+        {title}
+      </p>
+      {children}
+    </div>
+  );
+}
+
+/* -------------------- helpers -------------------- */
 
 function InfoTable({
   header,
   row,
   rows,
+  gridClass,
 }: {
   header: React.ReactNode;
   row?: React.ReactNode;
   rows?: { key: string; cells: React.ReactNode }[];
+  gridClass: string;
 }) {
   const bodyRows = rows ?? (row ? [{ key: "single", cells: row }] : []);
 
   return (
-    <div className="border border-line">
+    <div>
       <div
-        className={`${INFO_TABLE_GRID} px-5 py-3 border-b border-line text-[11px] uppercase tracking-[0.14em] text-muted-foreground`}
+        className={`${gridClass} gap-x-6 px-5 py-3 border-b border-line text-[11px] uppercase tracking-[0.14em] text-muted-foreground`}
       >
         {header}
       </div>
       {bodyRows.map((entry, index) => (
         <div
           key={entry.key}
-          className={`${INFO_TABLE_GRID} px-5 py-4 text-sm text-ink ${
+          className={`${gridClass} gap-x-6 px-5 py-4 text-sm text-ink ${
             index < bodyRows.length - 1 ? "border-b border-line" : ""
           }`}
         >
@@ -641,18 +605,18 @@ const DAC7_FAQ = [
   },
   {
     q: "Is DAC7 a new tax?",
-    a: "No. DAC7 does not create a new tax and does not change how your income is taxed. Your sales remain subject to the income tax and VAT rules that already apply in your country. What changes is that Camelune must share certain information with tax authorities when reporting conditions are met. Receiving a DAC7 report does not automatically mean you owe additional tax — authorities use the data to check whether your own tax returns are complete and accurate. You are still responsible for declaring your income and paying any tax due under your national rules, including income earned outside Camelune.",
+    a: "No. DAC7 does not create a new tax and does not change how your company's income is taxed. Your sales remain subject to the income tax and VAT rules that already apply in your country of establishment. What changes is that Camelune must share certain company information with tax authorities when reporting conditions are met. Receiving a DAC7 report does not automatically mean you owe additional tax — authorities use the data to check whether your company's tax returns are complete and accurate. You remain responsible for declaring income and paying any tax due under your national rules, including revenue earned outside Camelune.",
   },
   {
     q: "Why does Camelune need this information?",
-    a: "As a reporting platform operator, Camelune is legally required to collect, verify, and submit seller data under DAC7. The sections on this page — company details, commercial registration number, taxpayer ID (such as your CUI), VAT number, and bank account for payouts — correspond to the fields tax authorities expect in an annual report. We use this information to confirm your identity, determine whether you meet the reporting threshold, and file an accurate report by 31 January for the previous calendar year if required. Providing correct details now helps avoid delays or corrections later. If information is missing or incorrect, we may need to contact you before we can complete our reporting obligations.",
+    a: "As a reporting platform operator, Camelune is legally required to collect, verify, and submit company data under DAC7. The sections on this page — company details, commercial registration number, taxpayer ID, VAT number, and bank account for payouts — correspond to the fields tax authorities expect in an annual report for business sellers. We use this information to confirm your company's identity, determine whether you meet the reporting threshold, and file an accurate report by 31 January for the previous calendar year if required. Providing correct details now helps avoid delays or corrections later. If information is missing or incorrect, we may need to contact you before we can complete our reporting obligations.",
   },
   {
     q: "When will I be reported?",
-    a: "For sellers of goods on Camelune, reporting is triggered when you reach either 30 completed sales or €2,000 in total transaction value during a single calendar year — reaching one of these thresholds is enough. If you stay below both limits for the full year, Camelune generally does not need to report your activity for that period. When a report is due, Camelune submits it to the competent EU tax authority by 31 January of the following year (for example, 2025 activity is reported by 31 January 2026). You can track your progress toward the threshold on this page. Before or after submission, you should review the reported figures and contact us if anything looks wrong.",
+    a: "For registered businesses selling goods on Camelune, reporting is triggered when you reach either 30 completed sales or €2,000 in total transaction value during a single calendar year — reaching one of these thresholds is enough. If you stay below both limits for the full year, Camelune generally does not need to report your company's activity for that period. When a report is due, Camelune submits it to the competent EU tax authority by 31 January of the following year (for example, 2025 activity is reported by 31 January 2026). You can track your progress toward the threshold on this page. Before or after submission, you should review the reported figures and contact us if anything looks wrong.",
   },
   {
     q: "How is my data protected?",
-    a: "Camelune collects only the information required by DAC7 and handles it in line with applicable data-protection rules, including the GDPR. Your details are stored securely and shared with tax authorities only for the purpose of DAC7 reporting — not for marketing or unrelated uses. Under the directive, the receiving authority may exchange your data with other EU member states where you are resident, established, or carry out relevant activity. You are informed that this reporting takes place; that is part of the legal framework platforms must follow. If you have questions about how a specific tax authority uses or stores reported data, you can contact that authority directly in your country of residence.",
+    a: "Camelune collects only the information required by DAC7 and handles it in line with applicable data-protection rules, including the GDPR. Your company's details are stored securely and shared with tax authorities only for the purpose of DAC7 reporting — not for marketing or unrelated uses. Under the directive, the receiving authority may exchange your data with other EU member states where your business is established or carries out relevant activity. You are informed that this reporting takes place; that is part of the legal framework platforms must follow. If you have questions about how a specific tax authority uses or stores reported data, you can contact that authority directly in your country of establishment.",
   },
 ];

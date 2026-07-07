@@ -49,7 +49,11 @@ export interface Obligation {
   note?: string;
 }
 
+/** Phase 1: compliance hub supports registered business sellers only. */
+export type SellerType = "legal_entity";
+
 export const SELLER = {
+  sellerType: "legal_entity" as SellerType,
   name: "Veronica Fox",
   email: "nykaqito@mailinator.com",
   company: "Atelier Lune SRL",

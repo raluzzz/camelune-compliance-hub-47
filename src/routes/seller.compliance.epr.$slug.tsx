@@ -2,7 +2,6 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
 import { StatusBadge } from "@/components/seller/StatusBadge";
-import { EprPartnerNotice } from "@/components/seller/EprPartnerNotice";
 import {
   findObligationBySlug,
   DETAIL_SPECS,
@@ -167,12 +166,7 @@ function Page() {
         <OnFileSection obligation={o} spec={spec} />
       )}
 
-      {showStepper && (
-        <>
-          <Stepper spec={spec} onDone={() => setSubmitted(true)} />
-          <EprPartnerNotice compact />
-        </>
-      )}
+      {showStepper && <Stepper spec={spec} onDone={() => setSubmitted(true)} />}
 
       {submitted && (
         <section className="border border-emerald-200/80 bg-emerald-50/30 p-8 text-center my-10">
@@ -481,9 +475,9 @@ function Stepper({
                 {showOptional && (
                   <div className="mt-5 space-y-6">
                     <p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">
-                      Only required if your seller account is not established in
+                      Only required if your company is not established in
                       this country. Mandatory from August 2026 under PPWR for
-                      non-EU established sellers.
+                      companies not established in the EU.
                     </p>
                     {optionalFields.map((f) => (
                       <FieldInput
@@ -545,14 +539,23 @@ function Stepper({
       </div>
 
       <div className="flex justify-between items-center mt-6">
-        <button
-          type="button"
-          onClick={() => setStep(step - 1)}
-          disabled={step === 0}
-          className="text-xs uppercase tracking-[0.16em] text-muted-foreground hover:text-ink disabled:opacity-40"
-        >
-          ← {step === 0 ? "Cancel" : "Return to entries"}
-        </button>
+        {step === 0 ? (
+          <Link
+            to="/seller/compliance/epr"
+            className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-muted-foreground hover:text-ink"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.5} />
+            Cancel
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setStep(step - 1)}
+            className="text-xs uppercase tracking-[0.16em] text-muted-foreground hover:text-ink"
+          >
+            ← Return to entries
+          </button>
+        )}
 
         {step < 1 ? (
           <button

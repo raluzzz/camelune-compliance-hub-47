@@ -1,6 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ModuleLayout } from "@/components/seller/ModuleLayout";
+import {
+  ComplianceSelect,
+  complianceFieldLabelClass,
+} from "@/components/seller/ComplianceFormControls";
 import { ArrowLeft } from "lucide-react";
 import {
   DAC7_TAXPAYER_COUNTRIES,
@@ -64,20 +68,14 @@ function Page() {
       <div className="border border-line bg-background p-8 max-w-2xl">
         <div className="space-y-6">
           <Field label="Issuing country">
-            <select
+            <ComplianceSelect
               value={issuingCountry}
-              onChange={(e) => {
-                setIssuingCountry(e.target.value);
+              onValueChange={(next) => {
+                setIssuingCountry(next);
                 setError(null);
               }}
-              className="w-full border border-line bg-background px-4 py-3 text-sm focus:outline-none focus:border-ink"
-            >
-              {DAC7_TAXPAYER_COUNTRIES.map((country) => (
-                <option key={country} value={country}>
-                  {country}
-                </option>
-              ))}
-            </select>
+              options={DAC7_TAXPAYER_COUNTRIES}
+            />
           </Field>
 
           <Field label={tinLabel}>
@@ -92,18 +90,17 @@ function Page() {
           </Field>
 
           <Field label="Permanent establishment">
-            <select
+            <ComplianceSelect
               value={permanentEstablishment}
-              onChange={(e) => setPermanentEstablishment(e.target.value)}
-              className="w-full border border-line bg-background px-4 py-3 text-sm focus:outline-none focus:border-ink"
-            >
-              <option value="No">No</option>
-              {DAC7_TAXPAYER_COUNTRIES.map((country) => (
-                <option key={country} value={country}>
-                  Yes — {country}
-                </option>
-              ))}
-            </select>
+              onValueChange={setPermanentEstablishment}
+              options={[
+                { value: "No", label: "No" },
+                ...DAC7_TAXPAYER_COUNTRIES.map((country) => ({
+                  value: country,
+                  label: `Yes — ${country}`,
+                })),
+              ]}
+            />
           </Field>
         </div>
 
@@ -134,9 +131,7 @@ function Page() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
-        {label}
-      </label>
+      <label className={complianceFieldLabelClass}>{label}</label>
       {children}
     </div>
   );

@@ -101,7 +101,7 @@ export const DAC7_SECTIONS: Dac7Section[] = [
   { id: "registration", title: "B. Commercial registration number", status: "Saved" },
   {
     id: "taxpayer",
-    title: "C. Taxpayer ID / CUI",
+    title: "C. Taxpayer ID number",
     status: taxpayerSectionStatus(DAC7_SELLER.taxpayerId, DAC7_SELLER.taxpayerIssuingCountry),
     attentionMessage: taxpayerAttentionMessage(
       DAC7_SELLER.taxpayerId,
@@ -200,14 +200,12 @@ export function validateTaxpayerId(issuingCountry: string, taxpayerId: string): 
   return id.length >= 2;
 }
 
-export function taxpayerFieldLabel(issuingCountry: string): string {
-  return issuingCountry === "Romania" ? "Taxpayer ID (CUI)" : "Taxpayer ID number";
+export function taxpayerFieldLabel(_issuingCountry?: string): string {
+  return "Taxpayer ID number";
 }
 
-export function taxpayerSectionTitle(issuingCountry: string): string {
-  return issuingCountry === "Romania"
-    ? "Your taxpayer ID / CUI"
-    : "Your taxpayer ID number";
+export function taxpayerSectionTitle(_issuingCountry?: string): string {
+  return "Your taxpayer ID number";
 }
 
 export function formatPermanentEstablishment(country: string): string {
@@ -243,39 +241,15 @@ export function dac7SectionsNeedingAttention(sections: Dac7Section[]): string[] 
     .map((s) => s.attentionMessage ?? `${s.title} needs attention`);
 }
 
-export function getSectionDescriptions(countryCode: CountryCode): {
+export function getSectionDescriptions(_countryCode?: CountryCode): {
   registration: string;
   taxpayer: string;
 } {
-  if (countryCode === "RO") {
-    return {
-      registration:
-        "If your company is a legal entity, please enter your commercial registration number (Numărul de înregistrare la registrul comerțului — ONRC). Otherwise, you can skip this step.",
-      taxpayer:
-        "Please enter at least one tax identification number linked to your company — CUI (Codul unic de identificare fiscală). If you have tax IDs in other EU countries, add those too.",
-    };
-  }
-  if (countryCode === "DE") {
-    return {
-      registration:
-        "If your company is a legal entity, please enter your Handelsregisternummer. Otherwise, you can skip this step.",
-      taxpayer:
-        "Please enter your Steuernummer or W-IdNr. linked to your company. If you have tax IDs in other EU countries, add those too.",
-    };
-  }
-  if (countryCode === "FR") {
-    return {
-      registration:
-        "If your company is a legal entity, please enter your numéro SIRET ou SIREN. Otherwise, you can skip this step.",
-      taxpayer:
-        "Please enter the tax identification number linked to your company. If you have tax IDs in other EU countries, add those too.",
-    };
-  }
   return {
     registration:
-      "If your company is a legal entity, please enter your commercial registration number. Otherwise, you can skip this step.",
+      "Your company's registration number from the national commercial register in your country of establishment.",
     taxpayer:
-      "Please enter at least one tax identification number linked to your company. If you have tax IDs in other EU countries, add those too.",
+      "The tax identification number(s) on file for your company, including any additional EU countries where your business has a permanent establishment.",
   };
 }
 

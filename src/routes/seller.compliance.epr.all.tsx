@@ -12,6 +12,7 @@ import {
   type Obligation,
 } from "@/lib/epr-data";
 import { ArrowLeft, ArrowRight, ChevronDown } from "lucide-react";
+import { ComplianceSelect } from "@/components/seller/ComplianceFormControls";
 
 export const Route = createFileRoute("/seller/compliance/epr/all")({
   head: () => ({
@@ -144,19 +145,16 @@ function FilterSelect({
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="flex flex-col gap-1.5">
+    <label className="flex flex-col gap-1.5 min-w-[160px]">
       <span className="text-sm font-medium text-muted-foreground">{label}</span>
-      <select
+      <ComplianceSelect
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="min-w-[160px] border border-line bg-background px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-ink"
-      >
-        {options.map(([v, l]) => (
-          <option key={v} value={v}>
-            {l}
-          </option>
-        ))}
-      </select>
+        onValueChange={onChange}
+        options={options.map(([optionValue, optionLabel]) => ({
+          value: optionValue,
+          label: optionLabel,
+        }))}
+      />
     </label>
   );
 }

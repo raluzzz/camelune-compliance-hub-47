@@ -1,5 +1,59 @@
 import type { Dac7ReportRecord, ReportHistoryStatus } from "@/lib/dac7-data";
 
+export type Dac7QuarterRow = {
+  q: string;
+  sales: number;
+  fees: number;
+  taxes: number;
+  revenue: number;
+};
+
+export type Dac7ReportPdfContent = {
+  year: string;
+  status: string;
+  submitted: string;
+  reference: string;
+  seller: {
+    companyName: string;
+    country: string;
+    vatNumber: string;
+    registrationNumber: string;
+    taxpayerId: string;
+  };
+  quarters: Dac7QuarterRow[];
+  totals: Dac7QuarterRow;
+};
+
+export function buildDac7ReportPdfContent(input: {
+  year: string;
+  status: string;
+  submitted: string;
+  reference: string;
+  companyName: string;
+  country: string;
+  vatNumber: string;
+  registrationNumber: string;
+  taxpayerId: string;
+  quarters: Dac7QuarterRow[];
+  totals: Dac7QuarterRow;
+}): Dac7ReportPdfContent {
+  return {
+    year: input.year,
+    status: input.status,
+    submitted: input.submitted,
+    reference: input.reference,
+    seller: {
+      companyName: input.companyName,
+      country: input.country,
+      vatNumber: input.vatNumber,
+      registrationNumber: input.registrationNumber,
+      taxpayerId: input.taxpayerId,
+    },
+    quarters: input.quarters,
+    totals: input.totals,
+  };
+}
+
 export function hasSubmissionHistory(report: Dac7ReportRecord): boolean {
   return (report.submissionHistory?.length ?? 0) > 0;
 }

@@ -7,9 +7,14 @@ import {
   Download,
   Clock,
 } from "lucide-react";
-import { DAC7_REPORT_HISTORY, DAC7_SELLER, getDac7ReportRecord, type ReportHistoryStatus } from "@/lib/dac7-data";
+import { DAC7_SELLER, getDac7ReportRecord, type ReportHistoryStatus } from "@/lib/dac7-data";
 import { downloadDac7ReportPdf } from "@/lib/dac7-pdf";
-import { hasSubmissionHistory, reportBannerCopy } from "@/lib/dac7-report-display";
+import {
+  buildDac7ReportPdfContent,
+  hasSubmissionHistory,
+  reportBannerCopy,
+  type Dac7QuarterRow,
+} from "@/lib/dac7-report-display";
 
 export const Route = createFileRoute("/seller/compliance/dac7/report/$year")({
   head: ({ params }) => ({
@@ -30,7 +35,7 @@ export const Route = createFileRoute("/seller/compliance/dac7/report/$year")({
   component: Page,
 });
 
-const QUARTERS: { q: string; sales: number; fees: number; taxes: number; revenue: number }[] = [
+const QUARTERS: Dac7QuarterRow[] = [
   { q: "Q1", sales: 12, fees: 240, taxes: 480, revenue: 4800 },
   { q: "Q2", sales: 18, fees: 360, taxes: 720, revenue: 7200 },
   { q: "Q3", sales: 21, fees: 420, taxes: 840, revenue: 8400 },
@@ -56,14 +61,15 @@ function Page() {
   const banner = reportBannerCopy(report);
   const showSubmissionHistory = hasSubmissionHistory(report);
 
-  const total = QUARTERS.reduce(
+  const total: Dac7QuarterRow = QUARTERS.reduce(
     (a, r) => ({
+      q: "Total",
       sales: a.sales + r.sales,
       fees: a.fees + r.fees,
       taxes: a.taxes + r.taxes,
       revenue: a.revenue + r.revenue,
     }),
-    { sales: 0, fees: 0, taxes: 0, revenue: 0 },
+    { q: "Total", sales: 0, fees: 0, taxes: 0, revenue: 0 },
   );
 
   return (
@@ -129,7 +135,7 @@ function Page() {
       </section>
 
       <section className="mb-10">
-        <h2 className="text-base text-ink mb-5">Seller information reported</h2>
+        <h2 className="text-base text-ink mb-5">Company information reported</h2>
         <div className="border border-line bg-background p-6">
           <dl className="text-sm divide-y divide-line">
             <Row k="Company name" v={DAC7_SELLER.companyName} />
@@ -168,21 +174,22 @@ function Page() {
         <button
           type="button"
           onClick={() =>
-            downloadDac7ReportPdf(`DAC7-report-${year}.pdf`, [
-              `DAC7 Report — ${year}`,
-              `Company: ${DAC7_SELLER.companyName}`,
-              `Country: ${DAC7_SELLER.companyCountry}`,
-              `VAT: ${DAC7_SELLER.vatNumber}`,
-              `Registration: ${DAC7_SELLER.registrationNumber}`,
-              `Taxpayer ID: ${DAC7_SELLER.taxpayerId}`,
-              `Status: ${status}`,
-              `Submitted: ${submitted}`,
-              `Reference: ${reference}`,
-              `Total sales: ${total.sales}`,
-              `Total revenue: EUR ${total.revenue.toLocaleString()}`,
-              `Total fees: EUR ${total.fees.toLocaleString()}`,
-              `Total taxes: EUR ${total.taxes.toLocaleString()}`,
-            ])
+            downloadDac7ReportPdf(
+              `DAC7-report-${year}.pdf`,
+              buildDac7ReportPdfContent({
+                year,
+                status,
+                submitted,
+                reference,
+                companyName: DAC7_SELLER.companyName,
+                country: DAC7_SELLER.companyCountry,
+                vatNumber: DAC7_SELLER.vatNumber,
+                registrationNumber: DAC7_SELLER.registrationNumber,
+                taxpayerId: DAC7_SELLER.taxpayerId,
+                quarters: QUARTERS,
+                totals: total,
+              }),
+            )
           }
           className="inline-flex items-center gap-2 px-5 h-11 bg-ink text-cream text-xs uppercase tracking-[0.16em] hover:bg-ink/90"
         >

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarIcon, ChevronDown } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { formatOssEffectiveDate } from "@/lib/oss-registration";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -20,6 +20,19 @@ export const complianceFieldLabelClass =
 export const complianceControlClass =
   "w-full border border-line bg-background text-sm text-ink rounded-none shadow-none focus:outline-none focus:border-ink";
 
+export type ComplianceSelectOption =
+  | string
+  | {
+      value: string;
+      label: string;
+    };
+
+function normalizeSelectOptions(options: readonly ComplianceSelectOption[]) {
+  return options.map((option) =>
+    typeof option === "string" ? { value: option, label: option } : option,
+  );
+}
+
 export function ComplianceSelect({
   value,
   onValueChange,
@@ -28,9 +41,11 @@ export function ComplianceSelect({
 }: {
   value: string;
   onValueChange: (value: string) => void;
-  options: readonly string[];
+  options: readonly ComplianceSelectOption[];
   placeholder?: string;
 }) {
+  const normalizedOptions = normalizeSelectOptions(options);
+
   return (
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger
@@ -41,10 +56,10 @@ export function ComplianceSelect({
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="rounded-none border-line shadow-none">
-        {options.map((option) => (
-          <SelectItem key={option} value={option} className="rounded-none">
-            {option}
+      <SelectContent className="rounded-none border-line bg-background shadow-none">
+        {normalizedOptions.map((option) => (
+          <SelectItem key={option.value} value={option.value} className="rounded-none">
+            {option.label}
           </SelectItem>
         ))}
       </SelectContent>
@@ -114,36 +129,3 @@ export function ComplianceDatePicker({
   );
 }
 
-/** Styled native select fallback for simple lists (matches compliance inputs). */
-export function ComplianceNativeSelect({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  options: readonly string[];
-}) {
-  return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={cn(
-          complianceControlClass,
-          "appearance-none px-3 py-2.5 pr-10",
-        )}
-      >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-      <ChevronDown
-        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-        strokeWidth={1.5}
-      />
-    </div>
-  );
-}

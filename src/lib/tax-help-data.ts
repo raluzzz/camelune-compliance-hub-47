@@ -11,11 +11,11 @@ export const TAX_FAQ: FAQItem[] = [
   },
   {
     q: "Why does Camelune need my VAT number?",
-    a: "Camelune uses your VAT information to operate your account compliantly across destination markets, including determining how invoices are issued and whether you are eligible to sell in each country. We validate VAT numbers against the EU VIES system.",
+    a: "Camelune uses your company's VAT information to operate your account compliantly across destination markets, including determining how invoices are issued and whether your business is eligible to sell in each country. We validate VAT numbers against the EU VIES system.",
   },
   {
     q: "What is the margin scheme?",
-    a: "For second-hand goods, sellers may use a margin scheme where VAT is only applied to the difference between purchase and sale price, rather than the full selling price. This is relevant for many Camelune sellers. If you sell under the margin scheme, declare this accurately in your tax situation answers.",
+    a: "For second-hand goods, registered dealers may use a margin scheme where VAT is only applied to the difference between purchase and sale price, rather than the full selling price. This is relevant for many Camelune business sellers. If your company sells under the margin scheme, declare this accurately in your tax situation answers.",
   },
   {
     q: "What happens if my VAT information is wrong or missing?",

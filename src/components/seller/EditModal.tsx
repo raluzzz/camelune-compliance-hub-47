@@ -8,6 +8,10 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  ComplianceSelect,
+  complianceFieldLabelClass,
+} from "@/components/seller/ComplianceFormControls";
 
 export interface EditField {
   key: string;
@@ -61,21 +65,13 @@ export function EditModal({
         <div className="space-y-4 py-3">
           {fields.map((f) => (
             <div key={f.key}>
-              <label className="block text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
-                {f.label}
-              </label>
+              <label className={complianceFieldLabelClass}>{f.label}</label>
               {f.type === "select" ? (
-                <select
+                <ComplianceSelect
                   value={state[f.key] ?? ""}
-                  onChange={(e) => setState({ ...state, [f.key]: e.target.value })}
-                  className="w-full border border-line bg-background px-3 py-2.5 text-sm focus:outline-none focus:border-ink"
-                >
-                  {(f.options ?? []).map((o) => (
-                    <option key={o} value={o}>
-                      {o}
-                    </option>
-                  ))}
-                </select>
+                  onValueChange={(next) => setState({ ...state, [f.key]: next })}
+                  options={f.options ?? []}
+                />
               ) : (
                 <input
                   value={state[f.key] ?? ""}
