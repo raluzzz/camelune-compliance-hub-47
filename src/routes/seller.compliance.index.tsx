@@ -10,7 +10,7 @@ export const Route = createFileRoute("/seller/compliance/")({
       {
         name: "description",
         content:
-          "Tax, EPR and DAC7 compliance for your registered business on Camelune.",
+          "Tax, EPR and DAC7 compliance for legal entities selling on Camelune.",
       },
     ],
   }),
@@ -60,8 +60,7 @@ function Page() {
           <h1 className="text-[2rem] mt-3 text-ink">My Compliance</h1>
           <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-2xl">
             Manage the tax, environmental and platform reporting requirements for
-            your registered business — across the EU markets where you sell on
-            Camelune.
+            your company — across the EU markets where you sell on Camelune.
           </p>
         </header>
 

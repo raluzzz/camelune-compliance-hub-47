@@ -40,7 +40,7 @@ export const Route = createFileRoute("/seller/compliance/dac7/")({
       {
         name: "description",
         content:
-          "DAC7 platform reporting for your registered business — income reported to tax authorities when thresholds are met.",
+          "DAC7 platform reporting for legal entities — income reported to tax authorities when thresholds are met.",
       },
     ],
   }),
@@ -609,11 +609,11 @@ const DAC7_FAQ = [
   },
   {
     q: "Why does Camelune need this information?",
-    a: "As a reporting platform operator, Camelune is legally required to collect, verify, and submit company data under DAC7. The sections on this page — company details, commercial registration number, taxpayer ID, VAT number, and bank account for payouts — correspond to the fields tax authorities expect in an annual report for business sellers. We use this information to confirm your company's identity, determine whether you meet the reporting threshold, and file an accurate report by 31 January for the previous calendar year if required. Providing correct details now helps avoid delays or corrections later. If information is missing or incorrect, we may need to contact you before we can complete our reporting obligations.",
+    a: "As a reporting platform operator, Camelune is legally required to collect, verify, and submit company data under DAC7. The sections on this page — company details, commercial registration number, taxpayer ID, VAT number, and bank account for payouts — correspond to the fields tax authorities expect in an annual report for legal entities. We use this information to confirm your company's identity, determine whether you meet the reporting threshold, and file an accurate report by 31 January for the previous calendar year if required. Providing correct details now helps avoid delays or corrections later. If information is missing or incorrect, we may need to contact you before we can complete our reporting obligations.",
   },
   {
     q: "When will I be reported?",
-    a: "For registered businesses selling goods on Camelune, reporting is triggered when you reach either 30 completed sales or €2,000 in total transaction value during a single calendar year — reaching one of these thresholds is enough. If you stay below both limits for the full year, Camelune generally does not need to report your company's activity for that period. When a report is due, Camelune submits it to the competent EU tax authority by 31 January of the following year (for example, 2025 activity is reported by 31 January 2026). You can track your progress toward the threshold on this page. Before or after submission, you should review the reported figures and contact us if anything looks wrong.",
+    a: "For legal entities selling goods on Camelune, reporting is triggered when you reach either 30 completed sales or €2,000 in total transaction value during a single calendar year — reaching one of these thresholds is enough. If you stay below both limits for the full year, Camelune generally does not need to report your company's activity for that period. When a report is due, Camelune submits it to the competent EU tax authority by 31 January of the following year (for example, 2025 activity is reported by 31 January 2026). You can track your progress toward the threshold on this page. Before or after submission, you should review the reported figures and contact us if anything looks wrong.",
   },
   {
     q: "How is my data protected?",

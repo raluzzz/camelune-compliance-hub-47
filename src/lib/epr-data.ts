@@ -49,7 +49,7 @@ export interface Obligation {
   note?: string;
 }
 
-/** Phase 1: compliance hub supports registered business sellers only. */
+/** Phase 1: compliance hub supports legal-entity sellers only. */
 export type SellerType = "legal_entity";
 
 export const SELLER = {
@@ -219,7 +219,10 @@ export const DETAIL_SPECS: Record<string, DetailSpec> = {
     subtitle:
       "Packaged goods sold in Romania require registration with ANPM through a licensed OIREP (collective scheme).",
     authority: "ANPM / OIREP",
-    externalLink: { label: "ANPM packaging info", url: "https://www.anpm.ro" },
+    externalLink: {
+      label: "ANPM packaging info",
+      url: "https://anmap.gov.ro/category/12-deseuri/12-4-deseuri-de-ambalaje/",
+    },
     whatYouNeed: [
       { title: "EPR number (PACK)", desc: "ANPM / OIREP registration number issued after joining a collective scheme." },
       { title: "Registration document", desc: "Signed contract or registration certificate from your OIREP." },

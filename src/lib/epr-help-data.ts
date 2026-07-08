@@ -44,9 +44,9 @@ export const PACKAGING_COUNTRIES: CountrySectionData[] = [
       requirements: [
         [
           "Register as a packaging producer with ",
-          { label: "ANPM", url: "https://www.anpm.ro" },
+          { label: "ANPM", url: "https://anmap.gov.ro/category/12-deseuri/12-4-deseuri-de-ambalaje/" },
           " through a licensed ",
-          { label: "OIREP collective scheme", url: "https://www.anpm.ro" },
+          { label: "OIREP collective scheme", url: "https://anmap.gov.ro/category/12-4-4-operatori-economici-autorizati-sa-colecteze-trateze-deseuri-de-ambalaje/" },
           ".",
         ],
         [
@@ -68,7 +68,7 @@ export const PACKAGING_COUNTRIES: CountrySectionData[] = [
         ],
         [
           "Register with ",
-          { label: "ANPM", url: "https://www.anpm.ro" },
+          { label: "ANPM", url: "https://anmap.gov.ro/category/12-deseuri/12-4-deseuri-de-ambalaje/" },
           " through a licensed OIREP before placing packaging on the Romanian market.",
         ],
         [
@@ -304,7 +304,7 @@ export const BATTERIES_COUNTRIES: CountrySectionData[] = [
       requirements: [
         [
           "Register as a battery producer with ",
-          { label: "ANPM", url: "https://www.anpm.ro" },
+          { label: "ANPM", url: "https://anmap.gov.ro/category/12-deseuri/12-6-deseuri-de-baterii-si-acumulatori/" },
           " for batteries placed on the Romanian market — including batteries installed in devices.",
         ],
         [
@@ -323,7 +323,7 @@ export const BATTERIES_COUNTRIES: CountrySectionData[] = [
       requirements: [
         [
           "If you sell battery-powered products (quartz watches, smartwatches, accessories with integrated cells) to Romanian consumers, you must register with ",
-          { label: "ANPM", url: "https://www.anpm.ro" },
+          { label: "ANPM", url: "https://anmap.gov.ro/category/12-deseuri/12-6-deseuri-de-baterii-si-acumulatori/" },
           " regardless of where your company is established.",
         ],
         [
@@ -540,7 +540,7 @@ export const WEEE_COUNTRIES: CountrySectionData[] = [
       requirements: [
         [
           "WEEE registration with ",
-          { label: "ANPM", url: "https://www.anpm.ro" },
+          { label: "ANPM", url: "https://anmap.gov.ro/category/12-deseuri/12-5-deseuri-de-echipamente-electrice-si-electronice/" },
           " may apply depending on the product categories you sell.",
         ],
         [
@@ -558,7 +558,7 @@ export const WEEE_COUNTRIES: CountrySectionData[] = [
       requirements: [
         [
           "If WEEE obligations apply to your product categories in Romania, register with ",
-          { label: "ANPM", url: "https://www.anpm.ro" },
+          { label: "ANPM", url: "https://anmap.gov.ro/category/12-deseuri/12-5-deseuri-de-echipamente-electrice-si-electronice/" },
           " before placing electrical equipment on the Romanian market.",
         ],
         [

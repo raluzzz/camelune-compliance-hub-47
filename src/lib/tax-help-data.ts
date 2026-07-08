@@ -15,7 +15,7 @@ export const TAX_FAQ: FAQItem[] = [
   },
   {
     q: "What is the margin scheme?",
-    a: "For second-hand goods, registered dealers may use a margin scheme where VAT is only applied to the difference between purchase and sale price, rather than the full selling price. This is relevant for many Camelune business sellers. If your company sells under the margin scheme, declare this accurately in your tax situation answers.",
+    a: "For second-hand goods, legal entities may use a margin scheme where VAT is only applied to the difference between purchase and sale price, rather than the full selling price. This is relevant for many Camelune sellers. If your company sells under the margin scheme, declare this accurately in your tax situation answers.",
   },
   {
     q: "What happens if my VAT information is wrong or missing?",

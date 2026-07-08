@@ -41,7 +41,7 @@ export const Route = createFileRoute("/seller/compliance/tax/")({
       {
         name: "description",
         content:
-          "VAT registrations, OSS status and tax declarations for your registered business.",
+          "VAT registrations, OSS status and tax declarations for legal entities.",
       },
     ],
   }),
@@ -247,8 +247,8 @@ function TaxHeaderDescription() {
         <div className="mt-4 space-y-4 text-[15px] leading-relaxed text-muted-foreground">
           <p>
             Camelune is established in Romania, an EU member state. Under EU
-            VAT rules, we must collect certain tax information from registered
-            businesses — both within and outside the EU — so that cross-border
+            VAT rules, we must collect certain tax information from legal
+            entities — both within and outside the EU — so that cross-border
             sales through the platform can be handled correctly.
           </p>
           <p>

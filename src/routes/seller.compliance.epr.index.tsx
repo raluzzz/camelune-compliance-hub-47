@@ -40,7 +40,7 @@ export const Route = createFileRoute("/seller/compliance/epr/")({
       {
         name: "description",
         content:
-          "Extended Producer Responsibility for your registered business — packaging, batteries and electrical products in EU markets.",
+          "Extended Producer Responsibility for legal entities — packaging, batteries and electrical products in EU markets.",
       },
     ],
   }),
@@ -86,7 +86,7 @@ const CATEGORY_DESCRIPTION: Record<
 > = {
   packaging: {
     title: "Packaging (PACK)",
-    body: "Registered businesses that ship packaged goods to EU countries are required to register with the national packaging authority in each destination market and report the volumes placed on that market.",
+    body: "Legal entities that ship packaged goods to EU countries are required to register with the national packaging authority in each destination market and report the volumes placed on that market.",
     helpPath: "/help/epr/packaging",
   },
   batteries: {
@@ -129,7 +129,7 @@ function EprHeaderDescription() {
       {expanded && (
         <div className="mt-3">
           <p className="text-[15px] leading-relaxed text-muted-foreground">
-            On Camelune, registered businesses that ship products to EU countries are
+            On Camelune, legal entities that ship products to EU countries are
             considered producers under local law, and may be required to
             register and report for packaging, batteries and electrical
             products in each destination country where their listings are sold.
