@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { AdminComplianceAlerts } from "@/components/dac7/ComplianceAlerts";
 
 const NAV = [
   { label: "DAC7 queue", to: "/admin/dac7" },
@@ -52,7 +53,10 @@ export function AdminLayout({
           </nav>
         </div>
       </header>
-      <main className="max-w-[1100px] mx-auto px-8 py-10">{children}</main>
+      <main className="max-w-[1100px] mx-auto px-8 py-10">
+        <AdminComplianceAlerts />
+        {children}
+      </main>
     </div>
   );
 }

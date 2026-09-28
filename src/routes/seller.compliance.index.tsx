@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SellerLayout } from "@/components/seller/SellerLayout";
 import { ArrowRight } from "lucide-react";
 import { buildComplianceActionItems } from "@/lib/compliance-actions";
+import { sellerStatusLabel } from "@/lib/dac7-state";
+import { useCurrentSellerCase } from "@/lib/dac7-store";
 
 export const Route = createFileRoute("/seller/compliance/")({
   head: () => ({
@@ -26,30 +28,40 @@ interface Domain {
   to: string;
 }
 
-const DOMAINS: Domain[] = [
-  {
-    title: "Tax & VAT",
-    status: "All clear",
-    tone: "ok",
-    to: "/seller/compliance/tax",
-  },
-  {
-    title: "DAC7 Reporting",
-    status: "Complete your file",
-    tone: "warn",
-    to: "/seller/compliance/dac7",
-  },
-  {
-    title: "EPR Compliance",
-    status: "Needs action",
-    tone: "warn",
-    to: "/seller/compliance/epr",
-  },
-];
-
 const ACTIONS = buildComplianceActionItems();
 
 function Page() {
+  const dac7 = useCurrentSellerCase();
+  const dac7Tone: Tone = dac7.accountSuspended
+    ? "warn"
+    : dac7.status === "VERIFIED" ||
+        dac7.status === "EXCLUDED" ||
+        dac7.status === "REPORTED" ||
+        dac7.status === "REPORTABLE"
+      ? "ok"
+      : "warn";
+
+  const DOMAINS: Domain[] = [
+    {
+      title: "Tax & VAT",
+      status: "All clear",
+      tone: "ok",
+      to: "/seller/compliance/tax",
+    },
+    {
+      title: "DAC7 Reporting",
+      status: sellerStatusLabel(dac7.status),
+      tone: dac7Tone,
+      to: "/seller/compliance/dac7",
+    },
+    {
+      title: "EPR Compliance",
+      status: "Needs action",
+      tone: "warn",
+      to: "/seller/compliance/epr",
+    },
+  ];
+
   return (
     <SellerLayout>
       <div className="max-w-[1040px] mx-auto">

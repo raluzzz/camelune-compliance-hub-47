@@ -1,19 +1,21 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import type { ReactNode } from "react";
+import { SellerComplianceAlerts } from "@/components/dac7/ComplianceAlerts";
 
 /**
  * Focused workspace for a single compliance module.
- * Only the back link and the module content are shown.
  */
 export function ModuleLayout({
   children,
   backLabel = "Back to My Compliance",
   backTo = "/seller/compliance",
+  showComplianceAlerts = false,
 }: {
   children: ReactNode;
   backLabel?: string;
   backTo?: string;
+  showComplianceAlerts?: boolean;
 }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -29,7 +31,10 @@ export function ModuleLayout({
         </div>
       </div>
 
-      <main className="max-w-[900px] mx-auto px-8 py-14">{children}</main>
+      <main className="max-w-[900px] mx-auto px-8 py-14">
+        {showComplianceAlerts && <SellerComplianceAlerts />}
+        {children}
+      </main>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import {
   canTransition,
+  reminderStageLabel,
   sellerStatusLabel,
   thresholdExplain,
 } from "@/lib/dac7-state";
@@ -47,7 +48,7 @@ function Page() {
   return (
     <AdminLayout
       title={c.sellerName}
-      subtitle={`${sellerStatusLabel(c.status)} · ${c.reportingYear} · Due ${c.dueDate ?? "—"}`}
+      subtitle={`${sellerStatusLabel(c.status)} · ${c.reportingYear} · ${reminderStageLabel(c.reminderStage)}`}
     >
       <Link
         to="/admin/dac7"
@@ -63,8 +64,30 @@ function Page() {
       )}
 
       <section className="border border-line p-6 mb-8">
-        <p className="text-[15px] text-ink mb-2">Threshold</p>
+        <p className="text-[15px] text-ink mb-2">Threshold & diligence</p>
         <p className="text-sm text-muted-foreground">{thresholdExplain(c.salesCount, c.revenueEur)}</p>
+        <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+          <div>
+            <dt className="text-muted-foreground">Information requested</dt>
+            <dd className="text-ink">
+              {c.informationRequestedAt
+                ? new Date(c.informationRequestedAt).toLocaleString()
+                : "Not yet (no transactions or job pending)"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Reminder stage</dt>
+            <dd className="text-ink">{reminderStageLabel(c.reminderStage)}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Payout held</dt>
+            <dd className="text-ink">{c.payoutHeld ? "Yes" : "No"}</dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Account suspended</dt>
+            <dd className="text-ink">{c.accountSuspended ? "Yes" : "No"}</dd>
+          </div>
+        </dl>
         {c.assignee && (
           <p className="text-sm text-muted-foreground mt-3">
             Assigned to <span className="text-ink">{c.assignee}</span>
@@ -93,7 +116,10 @@ function Page() {
               ["Permanent establishment", c.profile.permanentEstablishment],
               ["VAT", c.profile.vatNumber],
               ["Bank", `${c.profile.bankAccountHolder} · ${c.profile.bankIban}`],
-              ["Declaration", c.declarationAccepted ? `Accepted ${c.declarationAcceptedAt ?? ""}` : "Not accepted"],
+              [
+                "Declaration",
+                c.declarationAccepted ? `Accepted ${c.declarationAcceptedAt ?? ""}` : "Not accepted",
+              ],
             ] as const
           ).map(([k, v]) => (
             <div key={k} className="grid grid-cols-[180px_1fr] gap-4 px-5 py-3">
@@ -159,12 +185,32 @@ function Page() {
               Hold payout
             </ActionButton>
           )}
+          {canTransition(c.status, "restrict_account") && (
+            <ActionButton
+              tone="danger"
+              onClick={() =>
+                run(() =>
+                  dac7Store.adminRestrictAccount(
+                    c.id,
+                    note.trim() ||
+                      "Account suspended — DAC7 information not provided after diligence period.",
+                  ),
+                )
+              }
+            >
+              Suspend account
+            </ActionButton>
+          )}
           {canTransition(c.status, "remove_restriction") && (
             <ActionButton onClick={() => run(() => dac7Store.adminRemoveRestriction(c.id))}>
-              Lift hold
+              Lift restrictions
             </ActionButton>
           )}
         </div>
+        <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
+          Automatic suspension also runs for sellers with transactions after the initial email, two
+          reminders (day 14 and 30), and at least 60 days without a complete file.
+        </p>
       </section>
 
       <section>

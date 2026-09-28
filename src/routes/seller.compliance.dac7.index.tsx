@@ -43,9 +43,14 @@ const STEPS = [
 function Page() {
   const c = useCurrentSellerCase();
   const next = sellerNextAction(c.status);
-  const editable = ["NOT_STARTED", "IN_PROGRESS", "NEEDS_CORRECTION", "PAYMENT_RESTRICTED"].includes(
-    c.status,
-  );
+  const editable = [
+    "NOT_STARTED",
+    "IN_PROGRESS",
+    "NEEDS_CORRECTION",
+    "PAYMENT_RESTRICTED",
+    "ACCOUNT_RESTRICTED",
+    "OVERDUE",
+  ].includes(c.status);
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<Dac7ProfileFields>(c.profile);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +83,7 @@ function Page() {
   }
 
   return (
-    <ModuleLayout>
+    <ModuleLayout showComplianceAlerts>
       <header className="mb-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
