@@ -12,13 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SellerComplianceIndexRouteImport } from './routes/seller.compliance.index'
 import { Route as HelpEprIndexRouteImport } from './routes/help.epr.index'
+import { Route as AdminDac7IndexRouteImport } from './routes/admin.dac7.index'
 import { Route as HelpTaxVatRouteImport } from './routes/help.tax.vat'
 import { Route as HelpEprWeeeRouteImport } from './routes/help.epr.weee'
 import { Route as HelpEprPackagingRouteImport } from './routes/help.epr.packaging'
 import { Route as HelpEprBatteriesRouteImport } from './routes/help.epr.batteries'
+import { Route as AdminDac7SellerIdRouteImport } from './routes/admin.dac7.$sellerId'
 import { Route as SellerComplianceTaxIndexRouteImport } from './routes/seller.compliance.tax.index'
 import { Route as SellerComplianceEprIndexRouteImport } from './routes/seller.compliance.epr.index'
 import { Route as SellerComplianceDac7IndexRouteImport } from './routes/seller.compliance.dac7.index'
+import { Route as AdminFinanceDac7IndexRouteImport } from './routes/admin.finance.dac7.index'
 import { Route as SellerComplianceEprByTypeRouteImport } from './routes/seller.compliance.epr.by-type'
 import { Route as SellerComplianceEprByCountryRouteImport } from './routes/seller.compliance.epr.by-country'
 import { Route as SellerComplianceEprAllRouteImport } from './routes/seller.compliance.epr.all'
@@ -43,6 +46,11 @@ const HelpEprIndexRoute = HelpEprIndexRouteImport.update({
   path: '/help/epr/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminDac7IndexRoute = AdminDac7IndexRouteImport.update({
+  id: '/admin/dac7/',
+  path: '/admin/dac7/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HelpTaxVatRoute = HelpTaxVatRouteImport.update({
   id: '/help/tax/vat',
   path: '/help/tax/vat',
@@ -63,6 +71,11 @@ const HelpEprBatteriesRoute = HelpEprBatteriesRouteImport.update({
   path: '/help/epr/batteries',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminDac7SellerIdRoute = AdminDac7SellerIdRouteImport.update({
+  id: '/admin/dac7/$sellerId',
+  path: '/admin/dac7/$sellerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SellerComplianceTaxIndexRoute =
   SellerComplianceTaxIndexRouteImport.update({
     id: '/seller/compliance/tax/',
@@ -81,6 +94,11 @@ const SellerComplianceDac7IndexRoute =
     path: '/seller/compliance/dac7/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminFinanceDac7IndexRoute = AdminFinanceDac7IndexRouteImport.update({
+  id: '/admin/finance/dac7/',
+  path: '/admin/finance/dac7/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SellerComplianceEprByTypeRoute =
   SellerComplianceEprByTypeRouteImport.update({
     id: '/seller/compliance/epr/by-type',
@@ -130,16 +148,19 @@ const SellerComplianceDac7PeriodYearRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin/dac7/$sellerId': typeof AdminDac7SellerIdRoute
   '/help/epr/batteries': typeof HelpEprBatteriesRoute
   '/help/epr/packaging': typeof HelpEprPackagingRoute
   '/help/epr/weee': typeof HelpEprWeeeRoute
   '/help/tax/vat': typeof HelpTaxVatRoute
+  '/admin/dac7/': typeof AdminDac7IndexRoute
   '/help/epr/': typeof HelpEprIndexRoute
   '/seller/compliance/': typeof SellerComplianceIndexRoute
   '/seller/compliance/epr/$slug': typeof SellerComplianceEprSlugRoute
   '/seller/compliance/epr/all': typeof SellerComplianceEprAllRoute
   '/seller/compliance/epr/by-country': typeof SellerComplianceEprByCountryRoute
   '/seller/compliance/epr/by-type': typeof SellerComplianceEprByTypeRoute
+  '/admin/finance/dac7/': typeof AdminFinanceDac7IndexRoute
   '/seller/compliance/dac7/': typeof SellerComplianceDac7IndexRoute
   '/seller/compliance/epr/': typeof SellerComplianceEprIndexRoute
   '/seller/compliance/tax/': typeof SellerComplianceTaxIndexRoute
@@ -150,16 +171,19 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/dac7/$sellerId': typeof AdminDac7SellerIdRoute
   '/help/epr/batteries': typeof HelpEprBatteriesRoute
   '/help/epr/packaging': typeof HelpEprPackagingRoute
   '/help/epr/weee': typeof HelpEprWeeeRoute
   '/help/tax/vat': typeof HelpTaxVatRoute
+  '/admin/dac7': typeof AdminDac7IndexRoute
   '/help/epr': typeof HelpEprIndexRoute
   '/seller/compliance': typeof SellerComplianceIndexRoute
   '/seller/compliance/epr/$slug': typeof SellerComplianceEprSlugRoute
   '/seller/compliance/epr/all': typeof SellerComplianceEprAllRoute
   '/seller/compliance/epr/by-country': typeof SellerComplianceEprByCountryRoute
   '/seller/compliance/epr/by-type': typeof SellerComplianceEprByTypeRoute
+  '/admin/finance/dac7': typeof AdminFinanceDac7IndexRoute
   '/seller/compliance/dac7': typeof SellerComplianceDac7IndexRoute
   '/seller/compliance/epr': typeof SellerComplianceEprIndexRoute
   '/seller/compliance/tax': typeof SellerComplianceTaxIndexRoute
@@ -171,16 +195,19 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin/dac7/$sellerId': typeof AdminDac7SellerIdRoute
   '/help/epr/batteries': typeof HelpEprBatteriesRoute
   '/help/epr/packaging': typeof HelpEprPackagingRoute
   '/help/epr/weee': typeof HelpEprWeeeRoute
   '/help/tax/vat': typeof HelpTaxVatRoute
+  '/admin/dac7/': typeof AdminDac7IndexRoute
   '/help/epr/': typeof HelpEprIndexRoute
   '/seller/compliance/': typeof SellerComplianceIndexRoute
   '/seller/compliance/epr/$slug': typeof SellerComplianceEprSlugRoute
   '/seller/compliance/epr/all': typeof SellerComplianceEprAllRoute
   '/seller/compliance/epr/by-country': typeof SellerComplianceEprByCountryRoute
   '/seller/compliance/epr/by-type': typeof SellerComplianceEprByTypeRoute
+  '/admin/finance/dac7/': typeof AdminFinanceDac7IndexRoute
   '/seller/compliance/dac7/': typeof SellerComplianceDac7IndexRoute
   '/seller/compliance/epr/': typeof SellerComplianceEprIndexRoute
   '/seller/compliance/tax/': typeof SellerComplianceTaxIndexRoute
@@ -193,16 +220,19 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin/dac7/$sellerId'
     | '/help/epr/batteries'
     | '/help/epr/packaging'
     | '/help/epr/weee'
     | '/help/tax/vat'
+    | '/admin/dac7/'
     | '/help/epr/'
     | '/seller/compliance/'
     | '/seller/compliance/epr/$slug'
     | '/seller/compliance/epr/all'
     | '/seller/compliance/epr/by-country'
     | '/seller/compliance/epr/by-type'
+    | '/admin/finance/dac7/'
     | '/seller/compliance/dac7/'
     | '/seller/compliance/epr/'
     | '/seller/compliance/tax/'
@@ -213,16 +243,19 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin/dac7/$sellerId'
     | '/help/epr/batteries'
     | '/help/epr/packaging'
     | '/help/epr/weee'
     | '/help/tax/vat'
+    | '/admin/dac7'
     | '/help/epr'
     | '/seller/compliance'
     | '/seller/compliance/epr/$slug'
     | '/seller/compliance/epr/all'
     | '/seller/compliance/epr/by-country'
     | '/seller/compliance/epr/by-type'
+    | '/admin/finance/dac7'
     | '/seller/compliance/dac7'
     | '/seller/compliance/epr'
     | '/seller/compliance/tax'
@@ -233,16 +266,19 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin/dac7/$sellerId'
     | '/help/epr/batteries'
     | '/help/epr/packaging'
     | '/help/epr/weee'
     | '/help/tax/vat'
+    | '/admin/dac7/'
     | '/help/epr/'
     | '/seller/compliance/'
     | '/seller/compliance/epr/$slug'
     | '/seller/compliance/epr/all'
     | '/seller/compliance/epr/by-country'
     | '/seller/compliance/epr/by-type'
+    | '/admin/finance/dac7/'
     | '/seller/compliance/dac7/'
     | '/seller/compliance/epr/'
     | '/seller/compliance/tax/'
@@ -254,16 +290,19 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminDac7SellerIdRoute: typeof AdminDac7SellerIdRoute
   HelpEprBatteriesRoute: typeof HelpEprBatteriesRoute
   HelpEprPackagingRoute: typeof HelpEprPackagingRoute
   HelpEprWeeeRoute: typeof HelpEprWeeeRoute
   HelpTaxVatRoute: typeof HelpTaxVatRoute
+  AdminDac7IndexRoute: typeof AdminDac7IndexRoute
   HelpEprIndexRoute: typeof HelpEprIndexRoute
   SellerComplianceIndexRoute: typeof SellerComplianceIndexRoute
   SellerComplianceEprSlugRoute: typeof SellerComplianceEprSlugRoute
   SellerComplianceEprAllRoute: typeof SellerComplianceEprAllRoute
   SellerComplianceEprByCountryRoute: typeof SellerComplianceEprByCountryRoute
   SellerComplianceEprByTypeRoute: typeof SellerComplianceEprByTypeRoute
+  AdminFinanceDac7IndexRoute: typeof AdminFinanceDac7IndexRoute
   SellerComplianceDac7IndexRoute: typeof SellerComplianceDac7IndexRoute
   SellerComplianceEprIndexRoute: typeof SellerComplianceEprIndexRoute
   SellerComplianceTaxIndexRoute: typeof SellerComplianceTaxIndexRoute
@@ -296,6 +335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpEprIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/dac7/': {
+      id: '/admin/dac7/'
+      path: '/admin/dac7'
+      fullPath: '/admin/dac7/'
+      preLoaderRoute: typeof AdminDac7IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/help/tax/vat': {
       id: '/help/tax/vat'
       path: '/help/tax/vat'
@@ -324,6 +370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpEprBatteriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/dac7/$sellerId': {
+      id: '/admin/dac7/$sellerId'
+      path: '/admin/dac7/$sellerId'
+      fullPath: '/admin/dac7/$sellerId'
+      preLoaderRoute: typeof AdminDac7SellerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/seller/compliance/tax/': {
       id: '/seller/compliance/tax/'
       path: '/seller/compliance/tax'
@@ -343,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/seller/compliance/dac7'
       fullPath: '/seller/compliance/dac7/'
       preLoaderRoute: typeof SellerComplianceDac7IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/finance/dac7/': {
+      id: '/admin/finance/dac7/'
+      path: '/admin/finance/dac7'
+      fullPath: '/admin/finance/dac7/'
+      preLoaderRoute: typeof AdminFinanceDac7IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/seller/compliance/epr/by-type': {
@@ -406,16 +466,19 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminDac7SellerIdRoute: AdminDac7SellerIdRoute,
   HelpEprBatteriesRoute: HelpEprBatteriesRoute,
   HelpEprPackagingRoute: HelpEprPackagingRoute,
   HelpEprWeeeRoute: HelpEprWeeeRoute,
   HelpTaxVatRoute: HelpTaxVatRoute,
+  AdminDac7IndexRoute: AdminDac7IndexRoute,
   HelpEprIndexRoute: HelpEprIndexRoute,
   SellerComplianceIndexRoute: SellerComplianceIndexRoute,
   SellerComplianceEprSlugRoute: SellerComplianceEprSlugRoute,
   SellerComplianceEprAllRoute: SellerComplianceEprAllRoute,
   SellerComplianceEprByCountryRoute: SellerComplianceEprByCountryRoute,
   SellerComplianceEprByTypeRoute: SellerComplianceEprByTypeRoute,
+  AdminFinanceDac7IndexRoute: AdminFinanceDac7IndexRoute,
   SellerComplianceDac7IndexRoute: SellerComplianceDac7IndexRoute,
   SellerComplianceEprIndexRoute: SellerComplianceEprIndexRoute,
   SellerComplianceTaxIndexRoute: SellerComplianceTaxIndexRoute,

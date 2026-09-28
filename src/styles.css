@@ -130,13 +130,6 @@
 }
 
 /* Camelune utility helpers */
-@utility nav-label {
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
 @utility hairline {
   border-color: var(--line);
   border-width: 1px;

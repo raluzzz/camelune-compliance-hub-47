@@ -10,7 +10,7 @@ export const Route = createFileRoute("/seller/compliance/")({
       {
         name: "description",
         content:
-          "Tax, EPR and DAC7 compliance for legal entities selling on Camelune.",
+          "Tax, DAC7 and EPR compliance for legal entities selling on Camelune.",
       },
     ],
   }),
@@ -34,16 +34,16 @@ const DOMAINS: Domain[] = [
     to: "/seller/compliance/tax",
   },
   {
+    title: "DAC7 Reporting",
+    status: "Complete your file",
+    tone: "warn",
+    to: "/seller/compliance/dac7",
+  },
+  {
     title: "EPR Compliance",
     status: "Needs action",
     tone: "warn",
     to: "/seller/compliance/epr",
-  },
-  {
-    title: "DAC7 Reporting",
-    status: "Not required yet",
-    tone: "neutral",
-    to: "/seller/compliance/dac7",
   },
 ];
 
@@ -59,7 +59,7 @@ function Page() {
           </p>
           <h1 className="text-[2rem] mt-3 text-ink">My Compliance</h1>
           <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground max-w-2xl">
-            Manage the tax, environmental and platform reporting requirements for
+            Manage the tax, platform and environmental reporting requirements for
             your company — across the EU markets where you sell on Camelune.
           </p>
         </header>

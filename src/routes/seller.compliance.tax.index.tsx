@@ -161,45 +161,54 @@ function Page() {
             <div>Status</div>
             <div className="text-right">Action</div>
           </div>
-          {vatRows.map((r, i) => (
-            <div
-              key={r.country}
-              className="grid grid-cols-[1fr_1.4fr_140px_120px] px-5 py-4 border-b border-line last:border-b-0 text-sm items-center"
-            >
-              <div className="text-ink">{r.country}</div>
-              <div className="text-ink">{r.number}</div>
-              <div>
-                <Badge
-                  tone={
-                    r.status === "Verified"
-                      ? "ok"
-                      : r.status === "Pending verification"
-                        ? "warn"
-                        : "bad"
-                  }
-                >
-                  {r.status}
-                </Badge>
-              </div>
-              <div className="text-right">
-                <VatNumberModal
-                  trigger={
-                    <button className="text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70">
-                      Edit
-                    </button>
-                  }
-                  title={`Edit VAT number — ${r.country}`}
-                  initialCountry={r.country}
-                  initialNumber={r.number}
-                  onSave={(row) => {
-                    const next = [...vatRows];
-                    next[i] = row;
-                    setVatRows(next);
-                  }}
-                />
-              </div>
+          {vatRows.length === 0 ? (
+            <div className="px-5 py-6 text-sm text-muted-foreground">
+              No VAT numbers on file.
             </div>
-          ))}
+          ) : (
+            vatRows.map((r, i) => (
+              <div
+                key={`${r.country}-${r.number}`}
+                className="grid grid-cols-[1fr_1.4fr_140px_120px] px-5 py-4 border-b border-line last:border-b-0 text-sm items-center"
+              >
+                <div className="text-ink">{r.country}</div>
+                <div className="text-ink">{r.number}</div>
+                <div>
+                  <Badge
+                    tone={
+                      r.status === "Verified"
+                        ? "ok"
+                        : r.status === "Pending verification"
+                          ? "warn"
+                          : "bad"
+                    }
+                  >
+                    {r.status}
+                  </Badge>
+                </div>
+                <div className="text-right">
+                  <VatNumberModal
+                    trigger={
+                      <button className="text-xs uppercase tracking-[0.16em] text-ink hover:opacity-70">
+                        Edit
+                      </button>
+                    }
+                    title={`Edit VAT number — ${r.country}`}
+                    initialCountry={r.country}
+                    initialNumber={r.number}
+                    onSave={(row) => {
+                      const next = [...vatRows];
+                      next[i] = row;
+                      setVatRows(next);
+                    }}
+                    onRemove={() =>
+                      setVatRows(vatRows.filter((_, idx) => idx !== i))
+                    }
+                  />
+                </div>
+              </div>
+            ))
+          )}
         </div>
         <VatNumberModal
           trigger={
@@ -509,14 +518,17 @@ function VatNumberModal({
   initialCountry,
   initialNumber,
   onSave,
+  onRemove,
 }: {
   trigger: ReactNode;
   title: string;
   initialCountry: string;
   initialNumber: string;
   onSave: (row: VatRow) => void;
+  onRemove?: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [country, setCountry] = useState(initialCountry);
   const [number, setNumber] = useState(initialNumber);
   const [touched, setTouched] = useState(false);
@@ -530,6 +542,7 @@ function VatNumberModal({
     setNumber(initialNumber);
     setTouched(false);
     setSaveError(null);
+    setConfirmingRemove(false);
   }
 
   function handleSave() {
@@ -558,61 +571,110 @@ function VatNumberModal({
     >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="bg-background border border-line max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="text-[18px] font-normal text-ink">{title}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 py-3">
-          <div>
-            <label className={complianceFieldLabelClass}>Country</label>
-            <ComplianceSelect
-              value={country}
-              onValueChange={(next) => {
-                setCountry(next);
-                setTouched(true);
-              }}
-              options={VAT_COUNTRIES}
-            />
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
-              VAT number
-            </label>
-            <input
-              value={number}
-              onChange={(e) => {
-                setNumber(e.target.value);
-                setSaveError(null);
-              }}
-              onBlur={() => setTouched(true)}
-              className={`w-full border bg-background px-3 py-2.5 text-sm focus:outline-none ${
-                formatError || saveError
-                  ? "border-rose-400 focus:border-rose-500"
-                  : "border-line focus:border-ink"
-              }`}
-            />
-            <p className="text-xs text-muted-foreground mt-1.5">
-              Validated against EU VIES on save. Invalid numbers cannot be verified.
+        {confirmingRemove ? (
+          <>
+            <DialogHeader>
+              <DialogTitle className="text-[18px] font-normal text-ink">
+                Remove VAT number?
+              </DialogTitle>
+            </DialogHeader>
+            <p className="text-sm leading-relaxed text-muted-foreground py-2">
+              This will remove the {initialCountry} VAT number {initialNumber}. You
+              can add it again later.
             </p>
-            {(formatError || saveError) && (
-              <p className="text-xs text-rose-700 mt-2">{formatError ?? saveError}</p>
-            )}
-          </div>
-        </div>
-        <DialogFooter className="gap-2">
-          <button
-            onClick={() => setOpen(false)}
-            className="px-5 h-10 border border-line text-xs uppercase tracking-[0.16em] text-ink hover:bg-muted/40"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!number.trim() || !!formatError}
-            className="px-5 h-10 bg-ink text-cream text-xs uppercase tracking-[0.16em] hover:bg-ink/90 disabled:opacity-40"
-          >
-            Save
-          </button>
-        </DialogFooter>
+            <DialogFooter className="gap-2 sm:space-x-0">
+              <button
+                type="button"
+                onClick={() => setConfirmingRemove(false)}
+                className="px-5 h-10 border border-line text-xs uppercase tracking-[0.16em] text-ink hover:bg-muted/40"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onRemove?.();
+                  setOpen(false);
+                  resetForm();
+                }}
+                className="px-5 h-10 bg-rose-700 text-white text-xs uppercase tracking-[0.16em] hover:bg-rose-800"
+              >
+                Remove
+              </button>
+            </DialogFooter>
+          </>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle className="text-[18px] font-normal text-ink">{title}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-3">
+              <div>
+                <label className={complianceFieldLabelClass}>Country</label>
+                <ComplianceSelect
+                  value={country}
+                  onValueChange={(next) => {
+                    setCountry(next);
+                    setTouched(true);
+                  }}
+                  options={VAT_COUNTRIES}
+                />
+              </div>
+              <div>
+                <label className="block text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
+                  VAT number
+                </label>
+                <input
+                  value={number}
+                  onChange={(e) => {
+                    setNumber(e.target.value);
+                    setSaveError(null);
+                  }}
+                  onBlur={() => setTouched(true)}
+                  className={`w-full border bg-background px-3 py-2.5 text-sm focus:outline-none ${
+                    formatError || saveError
+                      ? "border-rose-400 focus:border-rose-500"
+                      : "border-line focus:border-ink"
+                  }`}
+                />
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  Validated against EU VIES on save. Invalid numbers cannot be verified.
+                </p>
+                {(formatError || saveError) && (
+                  <p className="text-xs text-rose-700 mt-2">{formatError ?? saveError}</p>
+                )}
+              </div>
+            </div>
+            <DialogFooter className={`gap-2 sm:space-x-0 ${onRemove ? "sm:justify-between" : ""}`}>
+              {onRemove && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmingRemove(true)}
+                  className="px-5 h-10 border border-rose-200 text-xs uppercase tracking-[0.16em] text-rose-700 hover:bg-rose-50"
+                >
+                  Remove
+                </button>
+              )}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="px-5 h-10 border border-line text-xs uppercase tracking-[0.16em] text-ink hover:bg-muted/40"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={!number.trim() || !!formatError}
+                  className="px-5 h-10 bg-ink text-cream text-xs uppercase tracking-[0.16em] hover:bg-ink/90 disabled:opacity-40"
+                >
+                  Save
+                </button>
+              </div>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
